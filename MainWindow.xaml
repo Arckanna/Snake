@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
-        Title="Snake" SizeToContent="WidthAndHeight">
+        Title="Snake  - Score: 0" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered">
     <Grid>
         <Border BorderBrush="Black" BorderThickness="5">
             <Canvas Name="GameArea" ClipToBounds="True" Width="700" Height="400"></Canvas>
