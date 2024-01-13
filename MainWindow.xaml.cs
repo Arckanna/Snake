@@ -23,6 +23,42 @@ namespace Snake
         const string _gameTitle = "Snake";
         const int SnakeSquareSize = 20;
 
+        private SolidColorBrush snakeBodyBrush = Brushes.Green;
+        private SolidColorBrush snakeHeadBrush = Brushes.DarkGreen; 
+        private SolidColorBrush foodBrush = Brushes.Red;
+
+        private List<SnakePart> snakeParts = new List<SnakePart>();
+
+        public enum SnakeDirection
+        {
+            Left,
+            Right,
+            Up,
+            Down
+        };
+        private SnakeDirection snakeDirection = SnakeDirection.Right;
+        private int snakeLength = 10;
+
+        private void DrawSnake()
+        {
+            foreach (SnakePart snakePart in snakeParts)
+            {
+                if (snakePart.UiElement == null)
+                {
+                    snakePart.UiElement = new Rectangle
+                    {
+                        Width = SnakeSquareSize,
+                        Height = SnakeSquareSize
+                    };
+                    GameArea.Children.Add(snakePart.UiElement);
+                    Canvas.SetTop(snakePart.UiElement, snakePart.Position.Y);
+                    Canvas.SetLeft(snakePart.UiElement, snakePart.Position.X);
+               
+                    
+                }
+            }
+        }
+
         private void Window_ContentRendered(object sender, System.EventArgs e)
         {
             DrawGameArea();
