@@ -167,41 +167,17 @@ namespace Snake
         }
         private void DrawGameArea()
         {
-            bool doneDrawingBackground = false;
-            int nextX = 0;
-            int nextY = 0;
-            int rowCounter = 0;
-            bool nextIsOdd = false;
-
-            while (doneDrawingBackground == false)
+            var creamBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F5F2EB")!);
+            var rect = new Rectangle
             {
-                Rectangle rect = new Rectangle
-                {
-                    Width = SnakeSquareSize,
-                    Height = SnakeSquareSize,
-                    Fill = nextIsOdd ? Brushes.White : Brushes.Black
-                };
-
-                GameArea.Children.Add(rect);
-                Canvas.SetTop(rect, nextY);
-                Canvas.SetLeft(rect, nextX);
-
-                nextIsOdd = !nextIsOdd;
-
-                nextX += SnakeSquareSize;
-                if (nextX >= GameArea.ActualWidth)
-                {
-                    nextX = 0;
-                    nextY += SnakeSquareSize;
-                    rowCounter++;
-                    nextIsOdd = rowCounter % 2 == 0;
-                }
-                if (nextY >= GameArea.ActualHeight)
-                {
-                    doneDrawingBackground = true;
-                }
-            }
-            _backgroundCount = (int)(GameArea.ActualWidth / SnakeSquareSize) * (int)(GameArea.ActualHeight / SnakeSquareSize);
+                Width = GameArea.ActualWidth,
+                Height = GameArea.ActualHeight,
+                Fill = creamBrush
+            };
+            GameArea.Children.Add(rect);
+            Canvas.SetLeft(rect, 0);
+            Canvas.SetTop(rect, 0);
+            _backgroundCount = 1;
         }
 
         private void SpawnFood()
