@@ -42,6 +42,11 @@ namespace Snake
 
         private DispatcherTimer? gameTimer;
 
+        private int _score;
+        private Point? _foodPosition;
+        private Rectangle? _foodUiElement;
+        private int _backgroundCount;
+
         private void InitializeSnake()
         {
             snakeParts.Clear();
@@ -81,7 +86,9 @@ namespace Snake
         {
             DrawGameArea();
             InitializeSnake();
+            SpawnFood();
             DrawSnake();
+            UpdateTitle();
 
             gameTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             gameTimer.Tick += GameTick;
@@ -106,10 +113,34 @@ namespace Snake
                 _ => 0
             };
 
+            double newHeadX = head.Position.X + dX;
+            double newHeadY = head.Position.Y + dY;
+
+            if (newHeadX < 0 || newHeadX >= GameArea.ActualWidth
+                || newHeadY < 0 || newHeadY >= GameArea.ActualHeight)
+            {
+                gameTimer!.Stop();
+                Title = _gameTitle + " - Score: " + _score + " - Game Over";
+                MessageBox.Show("Le serpent a heurté un mur !", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (_foodPosition is Point fp && fp.X == newHeadX && fp.Y == newHeadY)
+            {
+                GameArea.Children.Remove(_foodUiElement!);
+                _foodUiElement = null;
+                _score++;
+                UpdateTitle();
+                SpawnFood();
+                snakeParts.Add(new SnakePart { Position = new Point(newHeadX, newHeadY) });
+                DrawSnake();
+                return;
+            }
+
             for (int i = 0; i < snakeParts.Count - 1; i++)
                 snakeParts[i].Position = snakeParts[i + 1].Position;
 
-            snakeParts[^1].Position = new Point(head.Position.X + dX, head.Position.Y + dY);
+            snakeParts[^1].Position = new Point(newHeadX, newHeadY);
             DrawSnake();
         }
 
@@ -170,6 +201,49 @@ namespace Snake
                     doneDrawingBackground = true;
                 }
             }
+            _backgroundCount = (int)(GameArea.ActualWidth / SnakeSquareSize) * (int)(GameArea.ActualHeight / SnakeSquareSize);
         }
+
+        private void SpawnFood()
+        {
+            if (_foodUiElement != null)
+            {
+                GameArea.Children.Remove(_foodUiElement);
+                _foodUiElement = null;
+            }
+
+            int maxCol = (int)(GameArea.ActualWidth / SnakeSquareSize);
+            int maxRow = (int)(GameArea.ActualHeight / SnakeSquareSize);
+
+            for (int attempt = 0; attempt < 100; attempt++)
+            {
+                int col = Random.Shared.Next(0, maxCol);
+                int row = Random.Shared.Next(0, maxRow);
+                var pos = new Point(col * SnakeSquareSize, row * SnakeSquareSize);
+                if (IsPositionOnSnake(pos)) continue;
+
+                _foodPosition = pos;
+                _foodUiElement = new Rectangle
+                {
+                    Width = SnakeSquareSize,
+                    Height = SnakeSquareSize,
+                    Fill = foodBrush
+                };
+                GameArea.Children.Insert(_backgroundCount, _foodUiElement);
+                Canvas.SetLeft(_foodUiElement, pos.X);
+                Canvas.SetTop(_foodUiElement, pos.Y);
+                return;
+            }
+            _foodPosition = null;
+        }
+
+        private bool IsPositionOnSnake(Point p)
+        {
+            foreach (var part in snakeParts)
+                if (part.Position.X == p.X && part.Position.Y == p.Y) return true;
+            return false;
+        }
+
+        private void UpdateTitle() => Title = _gameTitle + " - Score: " + _score;
     }
 }
