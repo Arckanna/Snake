@@ -7,6 +7,7 @@ Jeu du Snake classique en C# et WPF. Guidez le serpent vers les fruits pour gran
 - **Déplacement** : le serpent avance en continu ; changez de direction avec les touches.
 - **Fruits** : mangez les fruits rouges pour gagner 1 point et allonger le serpent.
 - **Murs** : si la tête touche un bord, la partie s’arrête (Game Over).
+- **Corps** : si la tête touche une partie de son corps, la partie s’arrête (Game Over).
 - **Score** : affiché dans le titre de la fenêtre.
 - **Fond** : couleur crème (#F5F2EB) pour un bon contraste avec le serpent et les fruits.
 
@@ -66,7 +67,7 @@ Snake/
 
 1. La partie démarre avec un serpent de 10 carrés, une direction initiale vers la droite et un fruit sur la grille.
 2. Un fruit mangé : +1 point, +1 segment, nouveau fruit à une case libre.
-3. Tête dans un mur : Game Over (MessageBox + titre mis à jour).
+3. Tête dans un mur ou dans le corps du serpent : Game Over (MessageBox + titre mis à jour).
 4. Le jeu tourne en continu ; aucune limite de score.
 
 ---

@@ -125,6 +125,17 @@ namespace Snake
                 return;
             }
 
+            for (int i = 0; i < snakeParts.Count - 1; i++)
+            {
+                if (snakeParts[i].Position.X == newHeadX && snakeParts[i].Position.Y == newHeadY)
+                {
+                    gameTimer!.Stop();
+                    Title = _gameTitle + " - Score: " + _score + " - Game Over";
+                    MessageBox.Show("Le serpent a heurté son propre corps !", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+            }
+
             if (_foodPosition is Point fp && fp.X == newHeadX && fp.Y == newHeadY)
             {
                 GameArea.Children.Remove(_foodUiElement!);
