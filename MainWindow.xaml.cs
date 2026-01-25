@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using Snake.Core;
 using Snake.Models;
+using Snake.Services;
 using Snake.ViewModels;
 
 namespace Snake
@@ -14,26 +15,29 @@ namespace Snake
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const int AreaWidth = 700;
-        private const int AreaHeight = 400;
-
         private readonly GameViewModel _viewModel;
         private static readonly SolidColorBrush SnakeBodyBrush = Brushes.Green;
         private static readonly SolidColorBrush SnakeHeadBrush = Brushes.DarkGreen;
         private static readonly SolidColorBrush FoodBrush = Brushes.Red;
 
-        public MainWindow()
+        public MainWindow(IGameEngine engine, ITimerService timerService)
         {
             InitializeComponent();
-            DataContext = _viewModel = new GameViewModel(new GameEngine());
+            DataContext = _viewModel = new GameViewModel(engine, timerService);
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             DrawGameArea();
             _viewModel.FrameUpdated += OnFrameUpdated;
-            _viewModel.Start(AreaWidth, AreaHeight);
+            _viewModel.Start();
             Focus();
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            _viewModel.Stop();
+            _viewModel.FrameUpdated -= OnFrameUpdated;
         }
 
         private void OnFrameUpdated(object? sender, EventArgs e)

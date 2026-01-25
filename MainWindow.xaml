@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
-        Title="{Binding Title}" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" Focusable="True">
+        Title="{Binding Title}" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered" Closed="Window_Closed" KeyDown="Window_KeyDown" Focusable="True">
     <Grid>
         <Border BorderBrush="Black" BorderThickness="5">
             <Grid Width="700" Height="400">

@@ -1,25 +1,24 @@
-using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Snake.Core;
 using Snake.Models;
+using Snake.Services;
 
 namespace Snake.ViewModels
 {
     /// <summary>
-    /// ViewModel du jeu Snake : orchestre IGameEngine, timer, et expose les données pour la vue.
+    /// ViewModel du jeu Snake : orchestre IGameEngine, ITimerService, et expose les données pour la vue.
     /// </summary>
     public partial class GameViewModel : ObservableObject
     {
         private readonly IGameEngine _engine;
-        private DispatcherTimer? _timer;
+        private readonly ITimerService _timerService;
         private Direction _pendingDirection = Direction.Right;
-        private double _areaWidth;
-        private double _areaHeight;
 
-        public GameViewModel(IGameEngine engine)
+        public GameViewModel(IGameEngine engine, ITimerService timerService)
         {
             _engine = engine;
+            _timerService = timerService;
         }
 
         /// <summary>Titre de la fenêtre (score, Game Over).</summary>
@@ -48,21 +47,17 @@ namespace Snake.ViewModels
         /// <summary>Déclenché à chaque frame pour que la vue redessine.</summary>
         public event EventHandler? FrameUpdated;
 
-        /// <summary>
-        /// Démarre une nouvelle partie.
-        /// </summary>
-        /// <param name="areaWidth">Largeur de la zone de jeu (pixels).</param>
-        /// <param name="areaHeight">Hauteur de la zone de jeu (pixels).</param>
-        public void Start(double areaWidth, double areaHeight)
+        /// <summary>Démarre une nouvelle partie (dimensions et paramètres depuis GameConfig).</summary>
+        public void Start()
         {
-            _areaWidth = areaWidth;
-            _areaHeight = areaHeight;
-            _engine.Initialize(areaWidth, areaHeight);
+            _engine.Initialize(
+                GameConfig.AreaWidth,
+                GameConfig.AreaHeight,
+                GameConfig.SquareSize,
+                GameConfig.InitialSnakeLength);
             _pendingDirection = Direction.Right;
 
-            _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-            _timer.Tick += OnTick;
-            _timer.Start();
+            _timerService.Start(TimeSpan.FromMilliseconds(GameConfig.TickIntervalMs), OnTickCallback);
 
             NotifyAll();
             FrameUpdated?.Invoke(this, EventArgs.Empty);
@@ -71,12 +66,14 @@ namespace Snake.ViewModels
         [RelayCommand]
         private void Rejouer()
         {
-            _engine.Initialize(_areaWidth, _areaHeight);
+            _engine.Initialize(
+                GameConfig.AreaWidth,
+                GameConfig.AreaHeight,
+                GameConfig.SquareSize,
+                GameConfig.InitialSnakeLength);
             _pendingDirection = Direction.Right;
 
-            _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-            _timer.Tick += OnTick;
-            _timer.Start();
+            _timerService.Start(TimeSpan.FromMilliseconds(GameConfig.TickIntervalMs), OnTickCallback);
 
             NotifyAll();
             FrameUpdated?.Invoke(this, EventArgs.Empty);
@@ -88,7 +85,13 @@ namespace Snake.ViewModels
             _pendingDirection = direction;
         }
 
-        private void OnTick(object? sender, EventArgs e)
+        /// <summary>Arrête le timer. À appeler à la fermeture de la vue.</summary>
+        public void Stop()
+        {
+            _timerService.Stop();
+        }
+
+        private void OnTickCallback()
         {
             _engine.Move(_pendingDirection);
 
@@ -96,10 +99,7 @@ namespace Snake.ViewModels
             FrameUpdated?.Invoke(this, EventArgs.Empty);
 
             if (_engine.State == GameState.GameOver)
-            {
-                _timer!.Stop();
-                _timer.Tick -= OnTick;
-            }
+                _timerService.Stop();
         }
 
         private void NotifyAll()
