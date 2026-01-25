@@ -5,10 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
-        Title="Snake  - Score: 0" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown">
+        Title="{Binding Title}" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" Focusable="True">
     <Grid>
         <Border BorderBrush="Black" BorderThickness="5">
-            <Canvas Name="GameArea" ClipToBounds="True" Width="700" Height="400" Focusable="False"></Canvas>
+            <Grid Width="700" Height="400">
+                <Canvas Name="GameArea" ClipToBounds="True" Width="700" Height="400" Focusable="False"/>
+                <!-- Overlay Game Over : Perdu, score, Rejouer -->
+                <Border Background="#CC000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsGameOver}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="Perdu" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="{Binding Score, StringFormat='Score : {0}'}" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <Button Content="Rejouer" Command="{Binding RejouerCommand}" Width="140" Height="36" FontSize="14" Cursor="Hand" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Border>
     </Grid>
 </Window>
