@@ -10,6 +10,7 @@ Jeu du Snake classique en C# et WPF. Guidez le serpent vers les fruits pour gran
 - **Corps** : si la tête touche une partie de son corps, la partie s’arrête (Game Over).
 - **Score** : affiché dans le titre de la fenêtre.
 - **Fond** : couleur crème (#F5F2EB) pour un bon contraste avec le serpent et les fruits.
+- **Écran d’accueil** : titre « Snake » et bouton « Démarrer » pour lancer une partie.
 
 ## Contrôles
 
@@ -55,10 +56,12 @@ dotnet build
 
 ```
 Snake/
-├── App.xaml / App.xaml.cs    # Point d’entrée WPF
-├── MainWindow.xaml           # Fenêtre et zone de jeu (Canvas 700×400)
-├── MainWindow.xaml.cs        # Logique : serpent, fruits, murs, score, timer
-├── SnakePart.cs              # Modèle d’un segment du serpent (Position, UiElement)
+├── App.xaml / App.xaml.cs      # Point d’entrée WPF
+├── WelcomeWindow.xaml          # Écran d’accueil (titre + Démarrer)
+├── WelcomeWindow.xaml.cs       # Ouverture de MainWindow au clic
+├── MainWindow.xaml             # Fenêtre et zone de jeu (Canvas 700×400)
+├── MainWindow.xaml.cs          # Logique : serpent, fruits, murs, score, timer
+├── SnakePart.cs                # Modèle d’un segment du serpent (Position, UiElement)
 ├── Snake.csproj
 └── README.md
 ```
