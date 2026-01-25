@@ -28,7 +28,7 @@ namespace Snake
         private SolidColorBrush snakeHeadBrush = Brushes.DarkGreen; 
         private SolidColorBrush foodBrush = Brushes.Red;
 
-        private List<SnakePart> snakeParts = new List<SnakePart>();
+        private List<SnakePartView> snakeParts = new List<SnakePartView>();
 
         public enum SnakeDirection
         {
@@ -52,7 +52,7 @@ namespace Snake
             snakeParts.Clear();
             for (int i = 0; i < snakeLength; i++)
             {
-                snakeParts.Add(new SnakePart
+                snakeParts.Add(new SnakePartView
                 {
                     Position = new Point(i * SnakeSquareSize, 200)
                 });
@@ -143,7 +143,7 @@ namespace Snake
                 _score++;
                 UpdateTitle();
                 SpawnFood();
-                snakeParts.Add(new SnakePart { Position = new Point(newHeadX, newHeadY) });
+                snakeParts.Add(new SnakePartView { Position = new Point(newHeadX, newHeadY) });
                 DrawSnake();
                 return;
             }
