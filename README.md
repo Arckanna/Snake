@@ -47,6 +47,14 @@ dotnet build
 # Exécutable : bin/Debug/net8.0-windows/Snake.exe (ou bin/Release/...)
 ```
 
+### Tests unitaires
+
+```bash
+dotnet test Snake.Tests/Snake.Tests.csproj
+```
+
+Voir **[TESTS.md](TESTS.md)** pour : à quoi servent les tests, pourquoi on les utilise, ce qu’on teste (Initialize, Move, collisions, demi-tours, Game Over) et comment les lancer.
+
 ## Technologies
 
 - **Langage** : C#
@@ -61,8 +69,8 @@ Le projet est structuré en **MVVM** pour séparer la logique métier, la prése
 
 | Couche | Rôle |
 |--------|------|
-| **Models** | `SnakePart`, `GameState`, `Direction` — données métier sans dépendance UI. |
-| **Core** | `IGameEngine` / `GameEngine` — moteur de jeu pur (déplacement, collisions, nourriture), **testable sans WPF**. `GameConfig` centralise les constantes (dimensions, timer, taille des cases). |
+| **Snake.Core** | `Models` (`SnakePart`, `GameState`, `Direction`), `Core` (`IGameEngine`, `GameEngine`, `GameConfig`) — logique métier et moteur de jeu **sans WPF**, testables. |
+| **Snake.Tests** | Tests unitaires (xUnit) du `GameEngine` : Initialize, Move, collisions, demi-tours, Game Over. |
 | **Services** | `ITimerService` / `DispatcherTimerService` — abstraction du timer ; permet de mocker en tests. |
 | **ViewModels** | `GameViewModel` (orchestre moteur + timer, expose Score, Title, `FrameUpdated`, commande Rejouer), `WelcomeViewModel` (commande Démarrer). |
 | **Vues** | `MainWindow` (dessin du serpent/fruit, binding Title, overlay Game Over), `WelcomeWindow` (écran d’accueil). |
@@ -75,14 +83,6 @@ Le projet est structuré en **MVVM** pour séparer la logique métier, la prése
 ```
 Snake/
 ├── App.xaml / App.xaml.cs         # Point d’entrée ; DI (IGameEngine, ITimerService, MainWindow) et affichage de WelcomeWindow
-├── Core/
-│   ├── GameConfig.cs              # Constantes : 700×400, 100 ms, 20 (carré), 10 (longueur init)
-│   ├── IGameEngine.cs             # Interface du moteur de jeu
-│   └── GameEngine.cs              # Implémentation (déplacement, collisions, nourriture)
-├── Models/
-│   ├── Direction.cs               # Left, Right, Up, Down
-│   ├── GameState.cs               # NotStarted, Playing, GameOver
-│   └── SnakePart.cs               # Segment (X, Y) sans référence UI
 ├── Services/
 │   ├── ITimerService.cs           # Start(interval, onTick), Stop()
 │   └── DispatcherTimerService.cs  # Implémentation WPF (DispatcherTimer)
@@ -92,7 +92,20 @@ Snake/
 ├── MainWindow.xaml / .xaml.cs     # Zone de jeu 700×400, overlay Perdu + Rejouer, binding GameViewModel
 ├── WelcomeWindow.xaml / .xaml.cs  # Écran d’accueil, binding WelcomeViewModel
 ├── Snake.csproj
-└── README.md
+├── README.md
+├── TESTS.md                       # Guide des tests unitaires (à quoi, pourquoi, comment)
+├── Snake.Core/                    # Bibliothèque .NET 8, sans WPF
+│   ├── Core/
+│   │   ├── GameConfig.cs          # Constantes : 700×400, 100 ms, 20 (carré), 10 (longueur init)
+│   │   ├── IGameEngine.cs         # Interface du moteur de jeu
+│   │   └── GameEngine.cs          # Implémentation (déplacement, collisions, nourriture)
+│   └── Models/
+│       ├── Direction.cs           # Left, Right, Up, Down
+│       ├── GameState.cs           # NotStarted, Playing, GameOver
+│       └── SnakePart.cs            # Segment (X, Y) sans référence UI
+└── Snake.Tests/                   # Tests unitaires (xUnit)
+    ├── GameEngineTests.cs         # Tests du GameEngine
+    └── Snake.Tests.csproj
 ```
 
 ## Règles

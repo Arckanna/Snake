@@ -13,4 +13,13 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="Snake.Core\Snake.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Snake.Core\**\*.cs" />
+    <Compile Remove="Snake.Tests\**\*.cs" />
+  </ItemGroup>
+
 </Project>

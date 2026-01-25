@@ -55,7 +55,6 @@ namespace Snake.Core
             if (_state == GameState.GameOver)
                 return;
 
-            // Appliquer la nouvelle direction si ce n'est pas un demi-tour
             bool forbidden = (_direction == Direction.Right && requestedDirection == Direction.Left)
                 || (_direction == Direction.Left && requestedDirection == Direction.Right)
                 || (_direction == Direction.Up && requestedDirection == Direction.Down)
@@ -80,14 +79,12 @@ namespace Snake.Core
             double newHeadX = head.X + dX;
             double newHeadY = head.Y + dY;
 
-            // Collision mur
             if (newHeadX < 0 || newHeadX >= _areaWidth || newHeadY < 0 || newHeadY >= _areaHeight)
             {
                 _state = GameState.GameOver;
                 return;
             }
 
-            // Collision corps
             for (int i = 0; i < _snake.Count - 1; i++)
             {
                 if (_snake[i].X == newHeadX && _snake[i].Y == newHeadY)
@@ -97,7 +94,6 @@ namespace Snake.Core
                 }
             }
 
-            // Manger le fruit
             if (_foodPosition is { } fp && fp.X == newHeadX && fp.Y == newHeadY)
             {
                 _score++;
@@ -106,7 +102,6 @@ namespace Snake.Core
                 return;
             }
 
-            // Déplacement normal : glisser le corps, mettre à jour la tête
             for (int i = 0; i < _snake.Count - 1; i++)
             {
                 _snake[i].X = _snake[i + 1].X;

@@ -26,16 +26,11 @@ namespace Snake.Core
         /// <summary>
         /// Initialise une nouvelle partie.
         /// </summary>
-        /// <param name="areaWidth">Largeur de la zone de jeu (pixels).</param>
-        /// <param name="areaHeight">Hauteur de la zone de jeu (pixels).</param>
-        /// <param name="squareSize">Taille d'une case (défaut 20).</param>
-        /// <param name="initialSnakeLength">Longueur initiale du serpent (défaut 10).</param>
         void Initialize(double areaWidth, double areaHeight, double squareSize = 20, int initialSnakeLength = 10);
 
         /// <summary>
         /// Avance d'une frame. Gère les demi-tours (ignorés).
         /// </summary>
-        /// <param name="requestedDirection">Direction demandée par l'utilisateur.</param>
         void Move(Direction requestedDirection);
     }
 }
