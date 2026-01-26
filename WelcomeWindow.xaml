@@ -5,32 +5,134 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
-        Title="Snake" Width="400" Height="350"
+        Title="Snake"
+        Width="700"
+        Height="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
-        Background="#F5F2EB"
+        Background="{StaticResource BackgroundColor}"
         Closed="Window_Closed">
     <Grid>
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40">
-            <TextBlock Text="Snake" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-            
-            <TextBlock HorizontalAlignment="Center" Margin="0,0,0,20" FontSize="14">
-                <Run Text="Meilleur score : "/>
-                <Run Text="{Binding BestScore, Mode=OneWay}" FontWeight="Bold"/>
-            </TextBlock>
-            
-            <TextBlock Text="Difficulté :" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,30">
-                <RadioButton Content="Lent" IsChecked="{Binding IsLent}" 
-                            Margin="10,0" GroupName="Difficulty"/>
-                <RadioButton Content="Normal" IsChecked="{Binding IsNormal}" 
-                            Margin="10,0" GroupName="Difficulty"/>
-                <RadioButton Content="Rapide" IsChecked="{Binding IsRapide}" 
-                            Margin="10,0" GroupName="Difficulty"/>
-            </StackPanel>
-            
-            <Button Content="Démarrer" Command="{Binding DemarrerCommand}"
-                    Width="160" Height="40" FontSize="16" Cursor="Hand"/>
+        <!-- Fond avec dégradé subtil -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0"
+                    EndPoint="1,1">
+                <GradientStop Color="#F5F2EB"
+                        Offset="0"/>
+                <GradientStop Color="#E8E5DD"
+                        Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <StackPanel VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Margin="50">
+            <!-- Logo/Titre avec effet -->
+            <Border Background="{StaticResource SurfaceColor}"
+                    CornerRadius="20"
+                    Padding="30,20"
+                    Margin="0,0,0,30"
+                    HorizontalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#40000000"
+                            Direction="270"
+                            ShadowDepth="5"
+                            BlurRadius="10"
+                            Opacity="0.2"/>
+                </Border.Effect>
+                <TextBlock Text="🐍 SNAKE"
+                           FontSize="56"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Style="{StaticResource TitleStyle}">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="#6BA644"
+                                Direction="270"
+                                ShadowDepth="2"
+                                BlurRadius="4"
+                                Opacity="0.5"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+            </Border>
+
+            <!-- Meilleur score dans une carte -->
+            <Border Background="{StaticResource SurfaceColor}"
+                    CornerRadius="12"
+                    Padding="20,15"
+                    Margin="0,0,0,25"
+                    HorizontalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#40000000"
+                            Direction="270"
+                            ShadowDepth="3"
+                            BlurRadius="8"
+                            Opacity="0.15"/>
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="🏆 "
+                            FontSize="20"
+                            VerticalAlignment="Center"
+                            Margin="0,0,8,0"/>
+                    <TextBlock VerticalAlignment="Center"
+                            FontSize="16"
+                            Style="{StaticResource SubtitleStyle}">
+                        <Run Text="Meilleur score : "/>
+                        <Run Text="{Binding BestScore, Mode=OneWay}"
+                             FontWeight="Bold"
+                             Foreground="{StaticResource AccentColor}"
+                             FontSize="18"/>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Section Difficulté -->
+            <Border Background="{StaticResource SurfaceColor}"
+                    CornerRadius="12"
+                    Padding="25,20"
+                    Margin="0,0,0,30"
+                    HorizontalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="#40000000"
+                            Direction="270"
+                            ShadowDepth="3"
+                            BlurRadius="8"
+                            Opacity="0.15"/>
+                </Border.Effect>
+                <StackPanel>
+                    <TextBlock Text="⚙️ Difficulté"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Foreground="{StaticResource PrimaryColor}"
+                               HorizontalAlignment="Center"
+                               Margin="0,0,0,15"/>
+                    <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                        <RadioButton Content="🐢 Lent"
+                                IsChecked="{Binding IsLent}"
+                                GroupName="Difficulty"/>
+                        <RadioButton Content="⚡ Normal"
+                                IsChecked="{Binding IsNormal}"
+                                GroupName="Difficulty"/>
+                        <RadioButton Content="🚀 Rapide"
+                                IsChecked="{Binding IsRapide}"
+                                GroupName="Difficulty"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Bouton Démarrer avec style amélioré -->
+            <Button Content="▶️ Démarrer"
+                    Command="{Binding DemarrerCommand}"
+                    Width="200"
+                    Height="50"
+                    FontSize="18"
+                    HorizontalAlignment="Center">
+                <Button.RenderTransform>
+                    <ScaleTransform ScaleX="1"
+                            ScaleY="1"/>
+                </Button.RenderTransform>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

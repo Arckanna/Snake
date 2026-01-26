@@ -7,7 +7,7 @@ namespace Snake
 {
     public partial class App : Application
     {
-        private WelcomeWindow? _welcomeWindow;
+        internal WelcomeWindow? _welcomeWindow;
         private IServiceProvider? _serviceProvider;
 
         private void Application_Startup(object sender, StartupEventArgs e)

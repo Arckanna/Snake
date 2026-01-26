@@ -5,54 +5,202 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
-        Title="{Binding Title}" SizeToContent="WidthAndHeight" ContentRendered="Window_ContentRendered" Closed="Window_Closed" KeyDown="Window_KeyDown" Focusable="True">
+        Title="{Binding Title}"
+        Width="700"
+        Height="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        ContentRendered="Window_ContentRendered"
+        Closed="Window_Closed"
+        KeyDown="Window_KeyDown"
+        Focusable="True">
     <Grid>
-        <Border BorderBrush="Black" BorderThickness="5">
-            <Grid Width="700" Height="400">
-                <Canvas Name="GameArea" ClipToBounds="True" Width="700" Height="400" Focusable="False"/>
-                
+        <Border BorderBrush="{StaticResource AccentColor}"
+                BorderThickness="3"
+                CornerRadius="8"
+                Background="{StaticResource SurfaceColor}">
+            <Border.Effect>
+                <DropShadowEffect Color="#40000000"
+                        Direction="270"
+                        ShadowDepth="5"
+                        BlurRadius="12"
+                        Opacity="0.25"/>
+            </Border.Effect>
+            <Grid Width="700"
+                    Height="600">
+                <Canvas Name="GameArea"
+                        ClipToBounds="True"
+                        Width="700"
+                        Height="600"
+                        Focusable="False"/>
+
                 <!-- Overlay Pause : Pause, bouton Reprendre -->
-                <Border Background="#CC000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Border Background="#CC000000"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
                     <Border.Style>
                         <Style TargetType="Border">
-                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="Visibility"
+                                    Value="Collapsed"/>
+                            <Setter Property="Opacity"
+                                    Value="0"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsPaused}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
+                                <DataTrigger Binding="{Binding IsPaused}"
+                                        Value="True">
+                                    <Setter Property="Visibility"
+                                            Value="Visible"/>
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                 From="0"
+                                                        To="1"
+                                                                 Duration="0:0:0.3"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Pause" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,24"/>
-                        <Button Content="Reprendre" Command="{Binding ReprendreCommand}" Width="140" Height="36" FontSize="14" Cursor="Hand" HorizontalAlignment="Center"/>
+                    <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                        <Border Background="{StaticResource SurfaceColor}"
+                                CornerRadius="20"
+                                Padding="40,30"
+                                HorizontalAlignment="Center">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#40000000"
+                                        Direction="270"
+                                        ShadowDepth="8"
+                                        BlurRadius="15"
+                                        Opacity="0.4"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="⏸️ PAUSE"
+                                           FontSize="42"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource PrimaryColor}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,30"/>
+                                <Button Content="▶️ Reprendre"
+                                        Command="{Binding ReprendreCommand}"
+                                        Width="180"
+                                        Height="45"
+                                        FontSize="16"
+                                        HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
-                
+
                 <!-- Overlay Game Over : Perdu, score, Rejouer -->
-                <Border Background="#CC000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Border Background="#CC000000"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch">
                     <Border.Style>
                         <Style TargetType="Border">
-                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="Visibility"
+                                    Value="Collapsed"/>
+                            <Setter Property="Opacity"
+                                    Value="0"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsGameOver}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
+                                <DataTrigger Binding="{Binding IsGameOver}"
+                                        Value="True">
+                                    <Setter Property="Visibility"
+                                            Value="Visible"/>
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                 From="0"
+                                                        To="1"
+                                                                 Duration="0:0:0.4"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <TextBlock Text="Perdu" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,16"/>
-                        <TextBlock Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8">
-                            <Run Text="Score : "/>
-                            <Run Text="{Binding Score, Mode=OneWay}"/>
-                            <Run Text="  Meilleur : "/>
-                            <Run Text="{Binding BestScore, Mode=OneWay}"/>
-                        </TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Content="Rejouer" Command="{Binding RejouerCommand}" Width="140" Height="36" FontSize="14" Cursor="Hand" Margin="0,0,10,0"/>
-                            <Button Content="Retour à l'accueil" Command="{Binding RetourAccueilCommand}" Width="140" Height="36" FontSize="14" Cursor="Hand" Margin="10,0,0,0"/>
-                        </StackPanel>
+                    <StackPanel VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                        <Border Background="{StaticResource SurfaceColor}"
+                                CornerRadius="20"
+                                Padding="50,40"
+                                HorizontalAlignment="Center"
+                                MinWidth="400">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#40000000"
+                                        Direction="270"
+                                        ShadowDepth="10"
+                                        BlurRadius="20"
+                                        Opacity="0.5"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="💀 GAME OVER"
+                                           FontSize="44"
+                                           FontWeight="Bold"
+                                           Foreground="{StaticResource ErrorColor}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,25">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect Color="#E74C3C"
+                                                Direction="270"
+                                                ShadowDepth="3"
+                                                BlurRadius="6"
+                                                Opacity="0.6"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+
+                                <!-- Scores dans une carte -->
+                                <Border Background="{StaticResource BackgroundColor}"
+                                        CornerRadius="12"
+                                        Padding="20,15"
+                                        Margin="0,0,0,25"
+                                        HorizontalAlignment="Center">
+                                    <StackPanel>
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="16"
+                                                   Style="{StaticResource SubtitleStyle}"
+                                                   Margin="0,0,0,8">
+                                            <Run Text="📊 Score : "/>
+                                            <Run Text="{Binding Score, Mode=OneWay}"
+                                                 FontWeight="Bold"
+                                                 Foreground="{StaticResource AccentColor}"
+                                                 FontSize="18"/>
+                                        </TextBlock>
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   FontSize="16"
+                                                   Style="{StaticResource SubtitleStyle}">
+                                            <Run Text="🏆 Meilleur : "/>
+                                            <Run Text="{Binding BestScore, Mode=OneWay}"
+                                                 FontWeight="Bold"
+                                                 Foreground="{StaticResource SuccessColor}"
+                                                 FontSize="18"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,10,0,0">
+                                    <Button Content="🔄 Rejouer"
+                                            Command="{Binding RejouerCommand}"
+                                            Width="160"
+                                            Height="45"
+                                            FontSize="15"
+                                            Margin="0,0,12,0"/>
+                                    <Button Content="🏠 Accueil"
+                                            Command="{Binding RetourAccueilCommand}"
+                                            Width="160"
+                                            Height="45"
+                                            FontSize="15"
+                                            Background="{StaticResource SecondaryColor}"
+                                            Margin="12,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
             </Grid>

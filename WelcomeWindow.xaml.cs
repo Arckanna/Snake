@@ -33,6 +33,11 @@ namespace Snake
         {
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.SetDifficulty(difficulty);
+            
+            // Synchroniser la position avec la fenêtre d'accueil
+            mainWindow.Left = Left;
+            mainWindow.Top = Top;
+            
             mainWindow.Show();
             Hide();
         }
