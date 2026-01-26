@@ -28,9 +28,9 @@ namespace Snake.ViewModels
         /// <summary>Titre de la fenêtre (score, Game Over, Pause).</summary>
         public string Title => _engine.State switch
         {
-            GameState.GameOver => $"Snake - Score: {_engine.Score} - Game Over",
-            GameState.Paused => $"Snake - Score: {_engine.Score} - Pause",
-            _ => $"Snake - Score: {_engine.Score}"
+            GameState.GameOver => $"Serpentium - Score: {_engine.Score} - Game Over",
+            GameState.Paused => $"Serpentium - Score: {_engine.Score} - Pause",
+            _ => $"Serpentium - Score: {_engine.Score}"
         };
 
         /// <summary>Score actuel.</summary>
