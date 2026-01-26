@@ -13,12 +13,16 @@ namespace Snake.ViewModels
     {
         private readonly IGameEngine _engine;
         private readonly ITimerService _timerService;
+        private readonly IScoreService _scoreService;
         private Direction _pendingDirection = Direction.Right;
+        private int _bestScore;
 
-        public GameViewModel(IGameEngine engine, ITimerService timerService)
+        public GameViewModel(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {
             _engine = engine;
             _timerService = timerService;
+            _scoreService = scoreService;
+            _bestScore = _scoreService.GetBestScore();
         }
 
         /// <summary>Titre de la fenêtre (score, Game Over).</summary>
@@ -28,6 +32,9 @@ namespace Snake.ViewModels
 
         /// <summary>Score actuel.</summary>
         public int Score => _engine.Score;
+
+        /// <summary>Meilleur score sauvegardé.</summary>
+        public int BestScore => _bestScore;
 
         /// <summary>État de la partie.</summary>
         public GameState State => _engine.State;
@@ -114,12 +121,18 @@ namespace Snake.ViewModels
             FrameUpdated?.Invoke(this, EventArgs.Empty);
 
             if (_engine.State == GameState.GameOver)
+            {
                 _timerService.Stop();
+                _scoreService.SaveScore(_engine.Score);
+                _bestScore = _scoreService.GetBestScore();
+                OnPropertyChanged(nameof(BestScore));
+            }
         }
 
         private void NotifyAll()
         {
             OnPropertyChanged(nameof(Score));
+            OnPropertyChanged(nameof(BestScore));
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(State));
             OnPropertyChanged(nameof(IsGameOver));

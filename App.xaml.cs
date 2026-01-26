@@ -15,6 +15,7 @@ namespace Snake
             var services = new ServiceCollection();
             services.AddTransient<IGameEngine, GameEngine>();
             services.AddTransient<ITimerService, DispatcherTimerService>();
+            services.AddSingleton<IScoreService, FileScoreService>();
             services.AddTransient<MainWindow>();
 
             _serviceProvider = services.BuildServiceProvider();
@@ -29,6 +30,11 @@ namespace Snake
             {
                 _welcomeWindow = new WelcomeWindow(_serviceProvider!);
                 _welcomeWindow.Closed += (s, e) => _welcomeWindow = null;
+            }
+            else
+            {
+                // Rafraîchir le meilleur score si la fenêtre existe déjà
+                _welcomeWindow.RefreshBestScore();
             }
             _welcomeWindow.Show();
             _welcomeWindow.Activate();

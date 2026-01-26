@@ -24,7 +24,12 @@
                     </Border.Style>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <TextBlock Text="Perdu" FontSize="36" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,16"/>
-                        <TextBlock Text="{Binding Score, StringFormat='Score : {0}'}" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,24"/>
+                        <TextBlock Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <Run Text="Score : "/>
+                            <Run Text="{Binding Score, Mode=OneWay}"/>
+                            <Run Text="  Meilleur : "/>
+                            <Run Text="{Binding BestScore, Mode=OneWay}"/>
+                        </TextBlock>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Content="Rejouer" Command="{Binding RejouerCommand}" Width="140" Height="36" FontSize="14" Cursor="Hand" Margin="0,0,10,0"/>
                             <Button Content="Retour à l'accueil" Command="{Binding RetourAccueilCommand}" Width="140" Height="36" FontSize="14" Cursor="Hand" Margin="10,0,0,0"/>

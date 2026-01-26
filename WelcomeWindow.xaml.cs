@@ -12,12 +12,19 @@ namespace Snake
         private readonly WelcomeViewModel _viewModel;
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>Rafraîchit l'affichage du meilleur score.</summary>
+        public void RefreshBestScore()
+        {
+            _viewModel.RefreshBestScore();
+        }
+
         public WelcomeWindow(IServiceProvider serviceProvider)
         {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
-            _viewModel = new WelcomeViewModel();
+            var scoreService = serviceProvider.GetRequiredService<Snake.Services.IScoreService>();
+            _viewModel = new WelcomeViewModel(scoreService);
             _viewModel.StartGameRequested += OnStartGameRequested;
             DataContext = _viewModel;
         }

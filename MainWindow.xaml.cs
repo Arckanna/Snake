@@ -21,10 +21,10 @@ namespace Snake
         private static readonly SolidColorBrush SnakeHeadBrush = Brushes.DarkGreen;
         private static readonly SolidColorBrush FoodBrush = Brushes.Red;
 
-        public MainWindow(IGameEngine engine, ITimerService timerService)
+        public MainWindow(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {
             InitializeComponent();
-            DataContext = _viewModel = new GameViewModel(engine, timerService);
+            DataContext = _viewModel = new GameViewModel(engine, timerService, scoreService);
         }
 
         /// <summary>Définit la difficulté du jeu avant le démarrage.</summary>

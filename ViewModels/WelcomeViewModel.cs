@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Snake.Models;
+using Snake.Services;
 
 namespace Snake.ViewModels
 {
@@ -9,7 +10,13 @@ namespace Snake.ViewModels
     /// </summary>
     public partial class WelcomeViewModel : ObservableObject
     {
+        private readonly IScoreService _scoreService;
         private Difficulty _selectedDifficulty = Difficulty.Normal;
+
+        public WelcomeViewModel(IScoreService scoreService)
+        {
+            _scoreService = scoreService;
+        }
 
         /// <summary>Difficulté sélectionnée par l'utilisateur.</summary>
         public Difficulty SelectedDifficulty
@@ -61,6 +68,15 @@ namespace Snake.ViewModels
                     OnPropertyChanged(nameof(IsNormal));
                 }
             }
+        }
+
+        /// <summary>Meilleur score sauvegardé.</summary>
+        public int BestScore => _scoreService.GetBestScore();
+
+        /// <summary>Rafraîchit l'affichage du meilleur score (à appeler lors du retour à l'accueil).</summary>
+        public void RefreshBestScore()
+        {
+            OnPropertyChanged(nameof(BestScore));
         }
 
         /// <summary>Déclenché lorsque l'utilisateur choisit de lancer une partie, avec la difficulté sélectionnée.</summary>

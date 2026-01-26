@@ -12,7 +12,12 @@
         Closed="Window_Closed">
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40">
-            <TextBlock Text="Snake" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+            <TextBlock Text="Snake" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+            
+            <TextBlock HorizontalAlignment="Center" Margin="0,0,0,20" FontSize="14">
+                <Run Text="Meilleur score : "/>
+                <Run Text="{Binding BestScore, Mode=OneWay}" FontWeight="Bold"/>
+            </TextBlock>
             
             <TextBlock Text="Difficulté :" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,30">
