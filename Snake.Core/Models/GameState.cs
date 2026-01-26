@@ -7,6 +7,7 @@ namespace Snake.Models
     {
         NotStarted,
         Playing,
+        Paused,
         GameOver
     }
 }

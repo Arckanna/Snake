@@ -63,6 +63,12 @@ namespace Snake
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.P)
+            {
+                _viewModel.TogglePause();
+                return;
+            }
+
             var d = KeyToDirection(e.Key);
             if (d.HasValue)
                 _viewModel.SetDirection(d.Value);

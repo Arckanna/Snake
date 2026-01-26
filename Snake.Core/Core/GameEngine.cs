@@ -50,9 +50,14 @@ namespace Snake.Core
             SpawnFood();
         }
 
+        public void SetState(GameState state)
+        {
+            _state = state;
+        }
+
         public void Move(Direction requestedDirection)
         {
-            if (_state == GameState.GameOver)
+            if (_state == GameState.GameOver || _state == GameState.Paused)
                 return;
 
             bool forbidden = (_direction == Direction.Right && requestedDirection == Direction.Left)

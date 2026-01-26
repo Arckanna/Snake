@@ -25,10 +25,13 @@ namespace Snake.ViewModels
             _bestScore = _scoreService.GetBestScore();
         }
 
-        /// <summary>Titre de la fenêtre (score, Game Over).</summary>
-        public string Title => _engine.State == GameState.GameOver
-            ? $"Snake - Score: {_engine.Score} - Game Over"
-            : $"Snake - Score: {_engine.Score}";
+        /// <summary>Titre de la fenêtre (score, Game Over, Pause).</summary>
+        public string Title => _engine.State switch
+        {
+            GameState.GameOver => $"Snake - Score: {_engine.Score} - Game Over",
+            GameState.Paused => $"Snake - Score: {_engine.Score} - Pause",
+            _ => $"Snake - Score: {_engine.Score}"
+        };
 
         /// <summary>Score actuel.</summary>
         public int Score => _engine.Score;
@@ -50,6 +53,9 @@ namespace Snake.ViewModels
 
         /// <summary>Indique si la partie est terminée (pour afficher l'overlay).</summary>
         public bool IsGameOver => _engine.State == GameState.GameOver;
+
+        /// <summary>Indique si le jeu est en pause.</summary>
+        public bool IsPaused => _engine.State == GameState.Paused;
 
         /// <summary>Déclenché à chaque frame pour que la vue redessine.</summary>
         public event EventHandler? FrameUpdated;
@@ -101,10 +107,39 @@ namespace Snake.ViewModels
             ReturnToWelcomeRequested?.Invoke(this, EventArgs.Empty);
         }
 
+        /// <summary>Met le jeu en pause ou le reprend.</summary>
+        public void TogglePause()
+        {
+            if (_engine.State == GameState.Playing)
+            {
+                _engine.SetState(GameState.Paused);
+                _timerService.Stop();
+                OnPropertyChanged(nameof(IsPaused));
+                OnPropertyChanged(nameof(Title));
+            }
+            else if (_engine.State == GameState.Paused)
+            {
+                _engine.SetState(GameState.Playing);
+                _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
+                OnPropertyChanged(nameof(IsPaused));
+                OnPropertyChanged(nameof(Title));
+            }
+        }
+
+        [RelayCommand]
+        private void Reprendre()
+        {
+            if (_engine.State == GameState.Paused)
+            {
+                TogglePause();
+            }
+        }
+
         /// <summary>Enregistre la direction demandée par l'utilisateur (demi-tours gérés par le moteur).</summary>
         public void SetDirection(Direction direction)
         {
-            _pendingDirection = direction;
+            if (_engine.State == GameState.Playing)
+                _pendingDirection = direction;
         }
 
         /// <summary>Arrête le timer. À appeler à la fermeture de la vue.</summary>
@@ -136,6 +171,7 @@ namespace Snake.ViewModels
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(State));
             OnPropertyChanged(nameof(IsGameOver));
+            OnPropertyChanged(nameof(IsPaused));
             OnPropertyChanged(nameof(SnakeParts));
             OnPropertyChanged(nameof(FoodPosition));
         }

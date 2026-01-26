@@ -32,5 +32,10 @@ namespace Snake.Core
         /// Avance d'une frame. Gère les demi-tours (ignorés).
         /// </summary>
         void Move(Direction requestedDirection);
+
+        /// <summary>
+        /// Définit l'état du jeu (utilisé pour la pause).
+        /// </summary>
+        void SetState(GameState state);
     }
 }
