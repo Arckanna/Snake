@@ -22,10 +22,12 @@ namespace Snake
             DataContext = _viewModel;
         }
 
-        private void OnStartGameRequested(object? sender, EventArgs e)
+        private void OnStartGameRequested(object? sender, Snake.Models.Difficulty difficulty)
         {
-            _serviceProvider.GetRequiredService<MainWindow>().Show();
-            Close();
+            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            mainWindow.SetDifficulty(difficulty);
+            mainWindow.Show();
+            Hide();
         }
 
         private void Window_Closed(object sender, EventArgs e)

@@ -16,6 +16,7 @@ namespace Snake
     public partial class MainWindow : Window
     {
         private readonly GameViewModel _viewModel;
+        private Difficulty _difficulty = Difficulty.Normal;
         private static readonly SolidColorBrush SnakeBodyBrush = Brushes.Green;
         private static readonly SolidColorBrush SnakeHeadBrush = Brushes.DarkGreen;
         private static readonly SolidColorBrush FoodBrush = Brushes.Red;
@@ -26,11 +27,18 @@ namespace Snake
             DataContext = _viewModel = new GameViewModel(engine, timerService);
         }
 
+        /// <summary>Définit la difficulté du jeu avant le démarrage.</summary>
+        public void SetDifficulty(Difficulty difficulty)
+        {
+            _difficulty = difficulty;
+        }
+
         private void Window_ContentRendered(object sender, EventArgs e)
         {
             DrawGameArea();
             _viewModel.FrameUpdated += OnFrameUpdated;
-            _viewModel.Start();
+            _viewModel.ReturnToWelcomeRequested += OnReturnToWelcomeRequested;
+            _viewModel.Start((int)_difficulty);
             Focus();
         }
 
@@ -38,6 +46,14 @@ namespace Snake
         {
             _viewModel.Stop();
             _viewModel.FrameUpdated -= OnFrameUpdated;
+            _viewModel.ReturnToWelcomeRequested -= OnReturnToWelcomeRequested;
+        }
+
+        private void OnReturnToWelcomeRequested(object? sender, EventArgs e)
+        {
+            var app = (App)Application.Current;
+            app.ShowWelcomeWindow();
+            Close();
         }
 
         private void OnFrameUpdated(object? sender, EventArgs e)

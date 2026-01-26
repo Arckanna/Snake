@@ -5,14 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Snake"
         mc:Ignorable="d"
-        Title="Snake" Width="400" Height="280"
+        Title="Snake" Width="400" Height="350"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#F5F2EB"
         Closed="Window_Closed">
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="40">
-            <TextBlock Text="Snake" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,40"/>
+            <TextBlock Text="Snake" FontSize="48" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,30"/>
+            
+            <TextBlock Text="Difficulté :" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,30">
+                <RadioButton Content="Lent" IsChecked="{Binding IsLent}" 
+                            Margin="10,0" GroupName="Difficulty"/>
+                <RadioButton Content="Normal" IsChecked="{Binding IsNormal}" 
+                            Margin="10,0" GroupName="Difficulty"/>
+                <RadioButton Content="Rapide" IsChecked="{Binding IsRapide}" 
+                            Margin="10,0" GroupName="Difficulty"/>
+            </StackPanel>
+            
             <Button Content="Démarrer" Command="{Binding DemarrerCommand}"
                     Width="160" Height="40" FontSize="16" Cursor="Hand"/>
         </StackPanel>

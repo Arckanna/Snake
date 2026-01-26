@@ -47,9 +47,17 @@ namespace Snake.ViewModels
         /// <summary>Déclenché à chaque frame pour que la vue redessine.</summary>
         public event EventHandler? FrameUpdated;
 
+        /// <summary>Déclenché lorsque l'utilisateur choisit de retourner à l'écran d'accueil.</summary>
+        public event EventHandler? ReturnToWelcomeRequested;
+
+        private int _tickIntervalMs = GameConfig.TickIntervalMs;
+
         /// <summary>Démarre une nouvelle partie (dimensions et paramètres depuis GameConfig).</summary>
-        public void Start()
+        /// <param name="tickIntervalMs">Intervalle du timer en millisecondes. Si non spécifié, utilise la valeur par défaut de GameConfig.</param>
+        public void Start(int? tickIntervalMs = null)
         {
+            _tickIntervalMs = tickIntervalMs ?? GameConfig.TickIntervalMs;
+            
             _engine.Initialize(
                 GameConfig.AreaWidth,
                 GameConfig.AreaHeight,
@@ -57,7 +65,7 @@ namespace Snake.ViewModels
                 GameConfig.InitialSnakeLength);
             _pendingDirection = Direction.Right;
 
-            _timerService.Start(TimeSpan.FromMilliseconds(GameConfig.TickIntervalMs), OnTickCallback);
+            _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
 
             NotifyAll();
             FrameUpdated?.Invoke(this, EventArgs.Empty);
@@ -73,10 +81,17 @@ namespace Snake.ViewModels
                 GameConfig.InitialSnakeLength);
             _pendingDirection = Direction.Right;
 
-            _timerService.Start(TimeSpan.FromMilliseconds(GameConfig.TickIntervalMs), OnTickCallback);
+            _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
 
             NotifyAll();
             FrameUpdated?.Invoke(this, EventArgs.Empty);
+        }
+
+        [RelayCommand]
+        private void RetourAccueil()
+        {
+            _timerService.Stop();
+            ReturnToWelcomeRequested?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>Enregistre la direction demandée par l'utilisateur (demi-tours gérés par le moteur).</summary>
