@@ -125,12 +125,7 @@
                     Width="200"
                     Height="50"
                     FontSize="18"
-                    HorizontalAlignment="Center">
-                <Button.RenderTransform>
-                    <ScaleTransform ScaleX="1"
-                            ScaleY="1"/>
-                </Button.RenderTransform>
-            </Button>
+                    HorizontalAlignment="Center"/>
         </StackPanel>
     </Grid>
 </UserControl>

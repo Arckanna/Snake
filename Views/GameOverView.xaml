@@ -5,11 +5,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="700">
-    <Border Background="#CC000000"
+    <!-- Overlay sombre semi-transparent pour assombrir le fond tout en gardant le plateau visible -->
+    <Border Background="#DD000000"
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch">
+            VerticalAlignment="Stretch"
+            Opacity="0.85">
         <StackPanel VerticalAlignment="Center"
                 HorizontalAlignment="Center">
+            <!-- Carte centrée avec effet de profondeur -->
             <Border Background="{StaticResource SurfaceColor}"
                     CornerRadius="20"
                     Padding="50,40"
@@ -18,9 +21,9 @@
                 <Border.Effect>
                     <DropShadowEffect Color="#40000000"
                             Direction="270"
-                            ShadowDepth="10"
-                            BlurRadius="20"
-                            Opacity="0.5"/>
+                            ShadowDepth="15"
+                            BlurRadius="25"
+                            Opacity="0.6"/>
                 </Border.Effect>
                 <StackPanel>
                     <TextBlock Text="💀 GAME OVER"

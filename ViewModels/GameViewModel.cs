@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Snake.Core;
@@ -93,7 +95,7 @@ namespace Snake.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur dans GameViewModel.Start: {ex.Message}\n{ex.StackTrace}");
+                Debug.WriteLine($"Erreur dans GameViewModel.Start: {ex.Message}\n{ex.StackTrace}");
                 throw; // Re-lancer pour que l'appelant puisse gérer
             }
         }

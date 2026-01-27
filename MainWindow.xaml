@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Snake"
         xmlns:views="clr-namespace:Snake.Views"
         xmlns:viewModels="clr-namespace:Snake.ViewModels"
         mc:Ignorable="d"
@@ -20,14 +19,6 @@
         <ContentControl Content="{Binding}">
             <ContentControl.Style>
                 <Style TargetType="ContentControl">
-                    <!-- Template par défaut pour l'écran d'accueil -->
-                    <Setter Property="ContentTemplate">
-                        <Setter.Value>
-                            <DataTemplate>
-                                <views:HomeView DataContext="{Binding WelcomeViewModel}"/>
-                            </DataTemplate>
-                        </Setter.Value>
-                    </Setter>
                     <Style.Triggers>
                         <!-- Écran d'accueil -->
                         <DataTrigger Binding="{Binding CurrentState}" Value="{x:Static viewModels:AppState.Home}">
@@ -40,7 +31,7 @@
                             </Setter>
                         </DataTrigger>
                         
-                        <!-- Écran de jeu -->
+                        <!-- Écran de jeu (avec overlay GameOver si nécessaire) -->
                         <DataTrigger Binding="{Binding CurrentState}" Value="{x:Static viewModels:AppState.Playing}">
                             <Setter Property="ContentTemplate">
                                 <Setter.Value>

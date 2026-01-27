@@ -1,4 +1,3 @@
-using SnakePart = Snake.Models.SnakePart;
 using Snake.Models;
 
 namespace Snake.Core
@@ -9,7 +8,7 @@ namespace Snake.Core
     /// </summary>
     public class GameEngine : IGameEngine
     {
-        private readonly List<SnakePart> _snake = new();
+        private readonly List<Snake.Models.SnakePart> _snake = new();
         private double _areaWidth;
         private double _areaHeight;
         private double _squareSize;
@@ -40,7 +39,7 @@ namespace Snake.Core
 
             for (int i = 0; i < initialSnakeLength; i++)
             {
-                _snake.Add(new SnakePart
+                _snake.Add(new Snake.Models.SnakePart
                 {
                     X = i * squareSize,
                     Y = startY
@@ -102,7 +101,7 @@ namespace Snake.Core
             if (_foodPosition is { } fp && fp.X == newHeadX && fp.Y == newHeadY)
             {
                 _score++;
-                _snake.Add(new SnakePart { X = newHeadX, Y = newHeadY });
+                _snake.Add(new Snake.Models.SnakePart { X = newHeadX, Y = newHeadY });
                 SpawnFood();
                 return;
             }

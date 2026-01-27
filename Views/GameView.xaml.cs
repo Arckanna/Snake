@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,6 +21,9 @@ namespace Snake.Views
         // Couleur moderne pour la nourriture
         private static readonly SolidColorBrush FoodBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E74C3C")!);
         private static readonly SolidColorBrush FoodAccentBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#C0392B")!);
+
+        // Propriété helper pour accéder au Canvas GameArea (évite les conflits avec le champ généré)
+        private Canvas? GetGameArea() => FindName("GameArea") as Canvas;
 
         public GameView()
         {
@@ -100,28 +105,29 @@ namespace Snake.Views
             try
             {
                 // Vérifier que le contrôle est chargé avant de dessiner
-                if (IsLoaded && GameArea != null)
+                if (IsLoaded && GetGameArea() != null)
                 {
                     DrawFrame();
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur dans OnFrameUpdated: {ex.Message}\n{ex.StackTrace}");
+                Debug.WriteLine($"Erreur dans OnFrameUpdated: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
         private void DrawGameArea()
         {
+            var gameArea = GetGameArea();
             // Vérifier que le Canvas est initialisé et a une taille
-            if (GameArea == null || GameArea.ActualWidth <= 0 || GameArea.ActualHeight <= 0)
+            if (gameArea == null || gameArea.ActualWidth <= 0 || gameArea.ActualHeight <= 0)
                 return;
 
             // Fond avec dégradé subtil
             var rect = new Rectangle
             {
-                Width = GameArea.ActualWidth,
-                Height = GameArea.ActualHeight
+                Width = gameArea.ActualWidth,
+                Height = gameArea.ActualHeight
             };
             var gradientBrush = new LinearGradientBrush
             {
@@ -131,7 +137,7 @@ namespace Snake.Views
             gradientBrush.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#F5F2EB")!, 0));
             gradientBrush.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#E8E5DD")!, 1));
             rect.Fill = gradientBrush;
-            GameArea.Children.Add(rect);
+            gameArea.Children.Add(rect);
             Canvas.SetLeft(rect, 0);
             Canvas.SetTop(rect, 0);
         }
@@ -140,20 +146,21 @@ namespace Snake.Views
         {
             try
             {
-                if (_viewModel == null || GameArea == null) return;
+                var gameArea = GetGameArea();
+                if (_viewModel == null || gameArea == null) return;
 
                 // Vérifier que le Canvas a une taille valide
-                if (GameArea.ActualWidth <= 0 || GameArea.ActualHeight <= 0) return;
+                if (gameArea.ActualWidth <= 0 || gameArea.ActualHeight <= 0) return;
 
                 // S'assurer que le fond est dessiné si nécessaire
-                if (GameArea.Children.Count == 0)
+                if (gameArea.Children.Count == 0)
                 {
                     DrawGameArea();
                 }
 
                 // Garder le fond (index 0), supprimer le reste
-                while (GameArea.Children.Count > 1)
-                    GameArea.Children.RemoveAt(1);
+                while (gameArea.Children.Count > 1)
+                    gameArea.Children.RemoveAt(1);
 
                 var size = _viewModel.SquareSize;
                 if (size <= 0) return;
@@ -208,15 +215,15 @@ namespace Snake.Views
                         Fill = Brushes.White,
                         Opacity = 0.8
                     };
-                    GameArea.Children.Add(leftEye);
-                    GameArea.Children.Add(rightEye);
+                    gameArea.Children.Add(leftEye);
+                    gameArea.Children.Add(rightEye);
                     Canvas.SetLeft(leftEye, part.X + eyeOffset);
                     Canvas.SetTop(leftEye, part.Y + eyeOffset);
                     Canvas.SetLeft(rightEye, part.X + size - eyeOffset - eyeSize);
                     Canvas.SetTop(rightEye, part.Y + eyeOffset);
                 }
                 
-                GameArea.Children.Add(r);
+                gameArea.Children.Add(r);
                 Canvas.SetLeft(r, part.X);
                 Canvas.SetTop(r, part.Y);
             }
@@ -250,8 +257,8 @@ namespace Snake.Views
                     Opacity = 0.6
                 };
                 
-                GameArea.Children.Add(food);
-                GameArea.Children.Add(foodAccent);
+                gameArea.Children.Add(food);
+                gameArea.Children.Add(foodAccent);
                 Canvas.SetLeft(food, fp.X + size * 0.075);
                 Canvas.SetTop(food, fp.Y + size * 0.075);
                 Canvas.SetLeft(foodAccent, fp.X + size * 0.3);
@@ -261,7 +268,7 @@ namespace Snake.Views
             catch (Exception ex)
             {
                 // Log l'erreur mais ne pas faire crasher l'application
-                System.Diagnostics.Debug.WriteLine($"Erreur dans DrawFrame: {ex.Message}");
+                Debug.WriteLine($"Erreur dans DrawFrame: {ex.Message}");
             }
         }
     }

@@ -1,3 +1,6 @@
+using System;
+using System.Diagnostics;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Snake.Core;
 using Snake.Models;
@@ -94,8 +97,8 @@ namespace Snake.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur dans NavigateToGame: {ex.Message}\n{ex.StackTrace}");
-                System.Windows.MessageBox.Show($"Erreur lors de la navigation vers le jeu: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                Debug.WriteLine($"Erreur dans NavigateToGame: {ex.Message}\n{ex.StackTrace}");
+                MessageBox.Show($"Erreur lors de la navigation vers le jeu: {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -111,8 +114,8 @@ namespace Snake.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Erreur lors du démarrage du jeu: {ex.Message}\n{ex.StackTrace}");
-                    System.Windows.MessageBox.Show($"Erreur lors du démarrage du jeu: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                    Debug.WriteLine($"Erreur lors du démarrage du jeu: {ex.Message}\n{ex.StackTrace}");
+                    MessageBox.Show($"Erreur lors du démarrage du jeu: {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

@@ -1,3 +1,6 @@
+using System;
+using System.Diagnostics;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Snake.Models;
@@ -91,8 +94,8 @@ namespace Snake.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erreur dans Demarrer: {ex.Message}\n{ex.StackTrace}");
-                System.Windows.MessageBox.Show($"Erreur lors du démarrage: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                Debug.WriteLine($"Erreur dans Demarrer: {ex.Message}\n{ex.StackTrace}");
+                MessageBox.Show($"Erreur lors du démarrage: {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
