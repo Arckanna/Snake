@@ -14,6 +14,8 @@ namespace Snake
     public partial class MainWindow : Window
     {
         private readonly ShellViewModel _viewModel;
+        
+        public ShellViewModel ShellViewModel => _viewModel;
 
         public MainWindow(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {

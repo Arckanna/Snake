@@ -5,9 +5,9 @@ namespace Snake.Views
     /// <summary>
     /// Écran d'accueil : sélection de difficulté et démarrage du jeu.
     /// </summary>
-    public partial class HomeView : UserControl
+    public partial class WelcomeView : UserControl
     {
-        public HomeView()
+        public WelcomeView()
         {
             InitializeComponent();
         }

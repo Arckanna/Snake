@@ -54,18 +54,26 @@ namespace Snake.ViewModels
         /// <summary>Démarre le jeu si une difficulté est en attente. Appelé par GameView quand il est prêt.</summary>
         public void StartGameIfPending()
         {
+            System.Diagnostics.Debug.WriteLine($"ShellViewModel.StartGameIfPending: _pendingDifficulty={_pendingDifficulty}");
             if (_pendingDifficulty.HasValue)
             {
                 try
                 {
-                    Game.Start((int)_pendingDifficulty.Value);
+                    int tickInterval = (int)_pendingDifficulty.Value;
+                    System.Diagnostics.Debug.WriteLine($"ShellViewModel.StartGameIfPending: Démarrage du jeu avec intervalle {tickInterval}ms");
+                    Game.Start(tickInterval);
                     _pendingDifficulty = null;
+                    System.Diagnostics.Debug.WriteLine("ShellViewModel.StartGameIfPending: Jeu démarré avec succès");
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Erreur lors du démarrage du jeu: {ex.Message}\n{ex.StackTrace}");
                     System.Windows.MessageBox.Show($"Erreur lors du démarrage du jeu: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("ShellViewModel.StartGameIfPending: Aucune difficulté en attente");
             }
         }
     }

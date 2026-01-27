@@ -79,6 +79,7 @@ namespace Snake.ViewModels
         {
             try
             {
+                Debug.WriteLine($"GameViewModel.Start: Démarrage avec tickIntervalMs={tickIntervalMs}");
                 _tickIntervalMs = tickIntervalMs ?? GameConfig.TickIntervalMs;
                 
                 _engine.Initialize(
@@ -88,9 +89,12 @@ namespace Snake.ViewModels
                     GameConfig.InitialSnakeLength);
                 _pendingDirection = Direction.Right;
 
+                Debug.WriteLine($"GameViewModel.Start: Engine initialisé, SnakeParts.Count={_engine.SnakeParts?.Count ?? 0}, FoodPosition={_engine.FoodPosition}");
+
                 _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
 
                 NotifyAll();
+                Debug.WriteLine($"GameViewModel.Start: FrameUpdated déclenché, abonnés={FrameUpdated?.GetInvocationList().Length ?? 0}");
                 FrameUpdated?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)

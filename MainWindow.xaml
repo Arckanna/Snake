@@ -16,38 +16,37 @@
         KeyDown="Window_KeyDown"
         Focusable="True">
     <Grid>
-        <ContentControl Content="{Binding}">
-            <ContentControl.Style>
-                <Style TargetType="ContentControl">
+        <Grid x:Name="WelcomeGrid"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <!-- Écran d'accueil -->
                         <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Home}">
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <views:HomeView DataContext="{Binding Welcome}"/>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                        
-                        <!-- Écran de jeu (avec overlay GameOver si nécessaire) -->
-                        <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Game}">
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <views:GameView DataContext="{Binding Game}"/>
-                                            <views:GameOverView DataContext="{Binding Game}"
-                                                                Visibility="{Binding IsGameOver, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
+                            <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
-            </ContentControl.Style>
-        </ContentControl>
+            </Grid.Style>
+            <views:WelcomeView DataContext="{Binding Welcome}" />
+        </Grid>
+        <Grid x:Name="GameGrid"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Game}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <views:GameView DataContext="{Binding Game}"/>
+            <views:GameOverView DataContext="{Binding Game}"
+                                Visibility="{Binding IsGameOver, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </Grid>
     </Grid>
 </Window>

@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using Snake.ViewModels;
+using Snake;
 
 namespace Snake.Views
 {
@@ -30,6 +31,25 @@ namespace Snake.Views
             InitializeComponent();
             Loaded += GameView_Loaded;
             DataContextChanged += GameView_DataContextChanged;
+            IsVisibleChanged += GameView_IsVisibleChanged;
+        }
+        
+        private void GameView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (IsVisible && IsLoaded && (bool)e.NewValue)
+            {
+                Debug.WriteLine("GameView.IsVisibleChanged: Le contrôle est maintenant visible");
+                // Réinitialiser le flag pour permettre un nouveau démarrage
+                _startGameAttempted = false;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    TryStartGame();
+                    if (_viewModel != null)
+                    {
+                        DrawFrame();
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         private void GameView_Loaded(object sender, RoutedEventArgs e)
@@ -41,11 +61,7 @@ namespace Snake.Views
                 DrawGameArea();
                 
                 // Démarrer le jeu si nécessaire (via ShellViewModel)
-                var shellViewModel = FindShellViewModel();
-                if (shellViewModel != null)
-                {
-                    shellViewModel.StartGameIfPending();
-                }
+                TryStartGame();
                 
                 if (_viewModel != null)
                 {
@@ -55,24 +71,93 @@ namespace Snake.Views
             }), System.Windows.Threading.DispatcherPriority.Loaded);
             Focus();
         }
+        
+        private bool _startGameAttempted = false;
+        
+        private void TryStartGame()
+        {
+            // Éviter les tentatives multiples
+            if (_startGameAttempted)
+                return;
+                
+            var shellViewModel = FindShellViewModel();
+            if (shellViewModel != null)
+            {
+                Debug.WriteLine("GameView: ShellViewModel trouvé, appel de StartGameIfPending");
+                _startGameAttempted = true;
+                shellViewModel.StartGameIfPending();
+            }
+            else
+            {
+                Debug.WriteLine("GameView: ShellViewModel non trouvé");
+                // Réessayer une seule fois après un court délai
+                if (!_startGameAttempted)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (!_startGameAttempted)
+                        {
+                            var shell = FindShellViewModel();
+                            if (shell != null)
+                            {
+                                Debug.WriteLine("GameView: ShellViewModel trouvé au deuxième essai");
+                                _startGameAttempted = true;
+                                shell.StartGameIfPending();
+                            }
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Loaded, null);
+                }
+            }
+        }
 
         private ViewModels.ShellViewModel? FindShellViewModel()
         {
-            // Remonter dans l'arbre visuel pour trouver le ShellViewModel
-            var element = this.Parent as System.Windows.FrameworkElement;
-            while (element != null)
-            {
-                if (element.DataContext is ViewModels.ShellViewModel shellViewModel)
-                    return shellViewModel;
-                
-                element = element.Parent as System.Windows.FrameworkElement;
-            }
-            
-            // Si on ne trouve pas dans l'arbre visuel, essayer depuis la fenêtre
+            // Essayer d'abord depuis la fenêtre (plus fiable)
             var window = System.Windows.Window.GetWindow(this);
             if (window?.DataContext is ViewModels.ShellViewModel windowShellViewModel)
+            {
+                Debug.WriteLine("GameView: ShellViewModel trouvé via Window.DataContext");
                 return windowShellViewModel;
+            }
             
+            // Essayer via le MainWindow directement avec la propriété publique
+            if (window is MainWindow mainWindow)
+            {
+                var shellVm = mainWindow.ShellViewModel;
+                if (shellVm != null)
+                {
+                    Debug.WriteLine("GameView: ShellViewModel trouvé via MainWindow.ShellViewModel");
+                    return shellVm;
+                }
+            }
+            
+            // Essayer via Application.Current.MainWindow
+            if (System.Windows.Application.Current?.MainWindow is MainWindow appMainWindow)
+            {
+                var shellVm = appMainWindow.ShellViewModel;
+                if (shellVm != null)
+                {
+                    Debug.WriteLine("GameView: ShellViewModel trouvé via Application.Current.MainWindow");
+                    return shellVm;
+                }
+            }
+            
+            // Remonter dans l'arbre visuel pour trouver le ShellViewModel
+            var element = this.Parent as System.Windows.FrameworkElement;
+            int depth = 0;
+            while (element != null && depth < 10) // Limiter la profondeur pour éviter les boucles infinies
+            {
+                if (element.DataContext is ViewModels.ShellViewModel shellViewModel)
+                {
+                    Debug.WriteLine($"GameView: ShellViewModel trouvé via arbre visuel (profondeur {depth})");
+                    return shellViewModel;
+                }
+                
+                element = element.Parent as System.Windows.FrameworkElement;
+                depth++;
+            }
+            
+            Debug.WriteLine($"GameView: ShellViewModel non trouvé (profondeur max atteinte: {depth})");
             return null;
         }
 
@@ -80,6 +165,16 @@ namespace Snake.Views
         {
             UnsubscribeFromViewModel();
             SubscribeToViewModel();
+            
+            // Si le contrôle est déjà chargé et qu'on a un nouveau DataContext, essayer de démarrer le jeu
+            if (IsLoaded && _viewModel != null)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    TryStartGame();
+                    DrawFrame();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         private void SubscribeToViewModel()
@@ -104,10 +199,15 @@ namespace Snake.Views
         {
             try
             {
+                Debug.WriteLine($"GameView.OnFrameUpdated: IsLoaded={IsLoaded}, GameArea={GetGameArea() != null}");
                 // Vérifier que le contrôle est chargé avant de dessiner
                 if (IsLoaded && GetGameArea() != null)
                 {
                     DrawFrame();
+                }
+                else
+                {
+                    Debug.WriteLine($"GameView.OnFrameUpdated: Conditions non remplies pour dessiner");
                 }
             }
             catch (Exception ex)
@@ -147,10 +247,23 @@ namespace Snake.Views
             try
             {
                 var gameArea = GetGameArea();
-                if (_viewModel == null || gameArea == null) return;
+                if (_viewModel == null || gameArea == null)
+                {
+                    Debug.WriteLine($"GameView.DrawFrame: _viewModel={_viewModel != null}, gameArea={gameArea != null}");
+                    return;
+                }
 
-                // Vérifier que le Canvas a une taille valide
-                if (gameArea.ActualWidth <= 0 || gameArea.ActualHeight <= 0) return;
+                // Vérifier que le Canvas a une taille valide (utiliser Width/Height si ActualWidth/Height sont 0)
+                double canvasWidth = gameArea.ActualWidth > 0 ? gameArea.ActualWidth : gameArea.Width;
+                double canvasHeight = gameArea.ActualHeight > 0 ? gameArea.ActualHeight : gameArea.Height;
+                
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    Debug.WriteLine($"GameView.DrawFrame: Canvas taille invalide (Actual: {gameArea.ActualWidth}x{gameArea.ActualHeight}, Size: {gameArea.Width}x{gameArea.Height})");
+                    // Réessayer après un court délai
+                    Dispatcher.BeginInvoke(new Action(() => DrawFrame()), System.Windows.Threading.DispatcherPriority.Loaded);
+                    return;
+                }
 
                 // S'assurer que le fond est dessiné si nécessaire
                 if (gameArea.Children.Count == 0)
@@ -163,12 +276,21 @@ namespace Snake.Views
                     gameArea.Children.RemoveAt(1);
 
                 var size = _viewModel.SquareSize;
-                if (size <= 0) return;
+                if (size <= 0)
+                {
+                    Debug.WriteLine($"GameView.DrawFrame: SquareSize invalide ({size}), State={_viewModel.State}");
+                    return;
+                }
 
                 var parts = _viewModel.SnakeParts;
-                if (parts == null) return;
+                if (parts == null || parts.Count == 0)
+                {
+                    Debug.WriteLine($"GameView.DrawFrame: SnakeParts est null ou vide (Count={parts?.Count ?? 0}), State={_viewModel.State}");
+                    return;
+                }
 
                 var count = parts.Count;
+                Debug.WriteLine($"GameView.DrawFrame: Dessin de {count} segments, FoodPosition={_viewModel.FoodPosition}, State={_viewModel.State}");
 
             for (int i = 0; i < count; i++)
             {
