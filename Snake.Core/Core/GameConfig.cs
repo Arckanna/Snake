@@ -9,7 +9,7 @@ namespace Snake.Core
         public const int AreaWidth = 700;
 
         /// <summary>Hauteur de la zone de jeu (pixels).</summary>
-        public const int AreaHeight = 400;
+        public const int AreaHeight = 600;
 
         /// <summary>Intervalle entre deux ticks (ms).</summary>
         public const int TickIntervalMs = 100;
