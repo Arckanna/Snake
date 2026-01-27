@@ -63,6 +63,12 @@ namespace Snake.ViewModels
         /// <summary>Déclenché lorsque l'utilisateur choisit de retourner à l'écran d'accueil.</summary>
         public event EventHandler? ReturnToWelcomeRequested;
 
+        /// <summary>Déclenché lorsque le jeu est terminé (Game Over).</summary>
+        public event EventHandler? GameOverRequested;
+
+        /// <summary>Déclenché lorsque le jeu redémarre (nouvelle partie).</summary>
+        public event EventHandler? GameRestarted;
+
         private int _tickIntervalMs = GameConfig.TickIntervalMs;
 
         /// <summary>Démarre une nouvelle partie (dimensions et paramètres depuis GameConfig).</summary>
@@ -98,6 +104,7 @@ namespace Snake.ViewModels
 
             NotifyAll();
             FrameUpdated?.Invoke(this, EventArgs.Empty);
+            GameRestarted?.Invoke(this, EventArgs.Empty);
         }
 
         [RelayCommand]
@@ -161,6 +168,7 @@ namespace Snake.ViewModels
                 _scoreService.SaveScore(_engine.Score);
                 _bestScore = _scoreService.GetBestScore();
                 OnPropertyChanged(nameof(BestScore));
+                GameOverRequested?.Invoke(this, EventArgs.Empty);
             }
         }
 
