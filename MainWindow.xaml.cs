@@ -9,16 +9,22 @@ using Snake.ViewModels;
 namespace Snake
 {
     /// <summary>
-    /// Fenêtre principale : gère la navigation entre les écrans via MainViewModel.
+    /// Fenêtre principale : gère la navigation entre les écrans via ShellViewModel.
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly MainViewModel _viewModel;
+        private readonly ShellViewModel _viewModel;
 
         public MainWindow(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {
             InitializeComponent();
-            DataContext = _viewModel = new MainViewModel(engine, timerService, scoreService);
+            
+            // Créer les ViewModels nécessaires
+            var welcomeViewModel = new WelcomeViewModel(scoreService);
+            var gameViewModel = new GameViewModel(engine, timerService, scoreService);
+            
+            // Créer le ShellViewModel qui pilote l'affichage
+            DataContext = _viewModel = new ShellViewModel(welcomeViewModel, gameViewModel);
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -28,24 +34,24 @@ namespace Snake
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            _viewModel.GameViewModel?.Stop();
+            _viewModel.Game.Stop();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             // Gérer les touches uniquement si on est en jeu
-            if (_viewModel.CurrentState != AppState.Playing || _viewModel.GameViewModel == null)
+            if (_viewModel.CurrentScreen != ScreenKind.Game)
                 return;
 
             if (e.Key == Key.P)
             {
-                _viewModel.GameViewModel.TogglePause();
+                _viewModel.Game.TogglePause();
                 return;
             }
 
             var d = KeyToDirection(e.Key);
             if (d.HasValue)
-                _viewModel.GameViewModel.SetDirection(d.Value);
+                _viewModel.Game.SetDirection(d.Value);
         }
 
         private static Direction? KeyToDirection(Key key)

@@ -6,7 +6,7 @@
         xmlns:views="clr-namespace:Snake.Views"
         xmlns:viewModels="clr-namespace:Snake.ViewModels"
         mc:Ignorable="d"
-        Title="{Binding Title}"
+        Title="Serpentium"
         Width="700"
         Height="600"
         WindowStartupLocation="CenterScreen"
@@ -21,39 +21,25 @@
                 <Style TargetType="ContentControl">
                     <Style.Triggers>
                         <!-- Écran d'accueil -->
-                        <DataTrigger Binding="{Binding CurrentState}" Value="{x:Static viewModels:AppState.Home}">
+                        <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Home}">
                             <Setter Property="ContentTemplate">
                                 <Setter.Value>
                                     <DataTemplate>
-                                        <views:HomeView DataContext="{Binding WelcomeViewModel}"/>
+                                        <views:HomeView DataContext="{Binding Welcome}"/>
                                     </DataTemplate>
                                 </Setter.Value>
                             </Setter>
                         </DataTrigger>
                         
                         <!-- Écran de jeu (avec overlay GameOver si nécessaire) -->
-                        <DataTrigger Binding="{Binding CurrentState}" Value="{x:Static viewModels:AppState.Playing}">
+                        <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Game}">
                             <Setter Property="ContentTemplate">
                                 <Setter.Value>
                                     <DataTemplate>
                                         <Grid>
-                                            <views:GameView DataContext="{Binding GameViewModel}"/>
-                                            <views:GameOverView DataContext="{Binding GameViewModel}"
+                                            <views:GameView DataContext="{Binding Game}"/>
+                                            <views:GameOverView DataContext="{Binding Game}"
                                                                 Visibility="{Binding IsGameOver, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </DataTrigger>
-                        
-                        <!-- Écran Game Over (overlay sur jeu) -->
-                        <DataTrigger Binding="{Binding CurrentState}" Value="{x:Static viewModels:AppState.GameOver}">
-                            <Setter Property="ContentTemplate">
-                                <Setter.Value>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <views:GameView DataContext="{Binding GameViewModel}"/>
-                                            <views:GameOverView DataContext="{Binding GameViewModel}"/>
                                         </Grid>
                                     </DataTemplate>
                                 </Setter.Value>

@@ -40,11 +40,11 @@ namespace Snake.Views
             {
                 DrawGameArea();
                 
-                // Démarrer le jeu si nécessaire (via MainViewModel)
-                var mainViewModel = FindMainViewModel();
-                if (mainViewModel != null)
+                // Démarrer le jeu si nécessaire (via ShellViewModel)
+                var shellViewModel = FindShellViewModel();
+                if (shellViewModel != null)
                 {
-                    mainViewModel.StartGameIfPending();
+                    shellViewModel.StartGameIfPending();
                 }
                 
                 if (_viewModel != null)
@@ -56,22 +56,22 @@ namespace Snake.Views
             Focus();
         }
 
-        private ViewModels.MainViewModel? FindMainViewModel()
+        private ViewModels.ShellViewModel? FindShellViewModel()
         {
-            // Remonter dans l'arbre visuel pour trouver le MainViewModel
+            // Remonter dans l'arbre visuel pour trouver le ShellViewModel
             var element = this.Parent as System.Windows.FrameworkElement;
             while (element != null)
             {
-                if (element.DataContext is ViewModels.MainViewModel mainViewModel)
-                    return mainViewModel;
+                if (element.DataContext is ViewModels.ShellViewModel shellViewModel)
+                    return shellViewModel;
                 
                 element = element.Parent as System.Windows.FrameworkElement;
             }
             
             // Si on ne trouve pas dans l'arbre visuel, essayer depuis la fenêtre
             var window = System.Windows.Window.GetWindow(this);
-            if (window?.DataContext is ViewModels.MainViewModel windowMainViewModel)
-                return windowMainViewModel;
+            if (window?.DataContext is ViewModels.ShellViewModel windowShellViewModel)
+                return windowShellViewModel;
             
             return null;
         }
