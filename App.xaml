@@ -116,5 +116,8 @@
             <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
             <Setter Property="FontSize" Value="14"/>
         </Style>
+        
+        <!-- Converter pour convertir booléen en Visibility -->
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Application.Resources>
 </Application>

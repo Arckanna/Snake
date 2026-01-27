@@ -85,7 +85,15 @@ namespace Snake.ViewModels
         [RelayCommand]
         private void Demarrer()
         {
-            StartGameRequested?.Invoke(this, SelectedDifficulty);
+            try
+            {
+                StartGameRequested?.Invoke(this, SelectedDifficulty);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur dans Demarrer: {ex.Message}\n{ex.StackTrace}");
+                System.Windows.MessageBox.Show($"Erreur lors du démarrage: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
     }
 }

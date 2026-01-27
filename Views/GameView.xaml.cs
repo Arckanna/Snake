@@ -30,8 +30,45 @@ namespace Snake.Views
         private void GameView_Loaded(object sender, RoutedEventArgs e)
         {
             SubscribeToViewModel();
-            DrawGameArea();
+            // Attendre que le layout soit complété avant de dessiner
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DrawGameArea();
+                
+                // Démarrer le jeu si nécessaire (via MainViewModel)
+                var mainViewModel = FindMainViewModel();
+                if (mainViewModel != null)
+                {
+                    mainViewModel.StartGameIfPending();
+                }
+                
+                if (_viewModel != null)
+                {
+                    // Forcer un premier dessin si le jeu est déjà démarré
+                    DrawFrame();
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
             Focus();
+        }
+
+        private ViewModels.MainViewModel? FindMainViewModel()
+        {
+            // Remonter dans l'arbre visuel pour trouver le MainViewModel
+            var element = this.Parent as System.Windows.FrameworkElement;
+            while (element != null)
+            {
+                if (element.DataContext is ViewModels.MainViewModel mainViewModel)
+                    return mainViewModel;
+                
+                element = element.Parent as System.Windows.FrameworkElement;
+            }
+            
+            // Si on ne trouve pas dans l'arbre visuel, essayer depuis la fenêtre
+            var window = System.Windows.Window.GetWindow(this);
+            if (window?.DataContext is ViewModels.MainViewModel windowMainViewModel)
+                return windowMainViewModel;
+            
+            return null;
         }
 
         private void GameView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -60,11 +97,26 @@ namespace Snake.Views
 
         private void OnFrameUpdated(object? sender, EventArgs e)
         {
-            DrawFrame();
+            try
+            {
+                // Vérifier que le contrôle est chargé avant de dessiner
+                if (IsLoaded && GameArea != null)
+                {
+                    DrawFrame();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur dans OnFrameUpdated: {ex.Message}\n{ex.StackTrace}");
+            }
         }
 
         private void DrawGameArea()
         {
+            // Vérifier que le Canvas est initialisé et a une taille
+            if (GameArea == null || GameArea.ActualWidth <= 0 || GameArea.ActualHeight <= 0)
+                return;
+
             // Fond avec dégradé subtil
             var rect = new Rectangle
             {
@@ -86,15 +138,30 @@ namespace Snake.Views
 
         private void DrawFrame()
         {
-            if (_viewModel == null) return;
+            try
+            {
+                if (_viewModel == null || GameArea == null) return;
 
-            // Garder le fond (index 0), supprimer le reste
-            while (GameArea.Children.Count > 1)
-                GameArea.Children.RemoveAt(1);
+                // Vérifier que le Canvas a une taille valide
+                if (GameArea.ActualWidth <= 0 || GameArea.ActualHeight <= 0) return;
 
-            var size = _viewModel.SquareSize;
-            var parts = _viewModel.SnakeParts;
-            var count = parts.Count;
+                // S'assurer que le fond est dessiné si nécessaire
+                if (GameArea.Children.Count == 0)
+                {
+                    DrawGameArea();
+                }
+
+                // Garder le fond (index 0), supprimer le reste
+                while (GameArea.Children.Count > 1)
+                    GameArea.Children.RemoveAt(1);
+
+                var size = _viewModel.SquareSize;
+                if (size <= 0) return;
+
+                var parts = _viewModel.SnakeParts;
+                if (parts == null) return;
+
+                var count = parts.Count;
 
             for (int i = 0; i < count; i++)
             {
@@ -189,6 +256,12 @@ namespace Snake.Views
                 Canvas.SetTop(food, fp.Y + size * 0.075);
                 Canvas.SetLeft(foodAccent, fp.X + size * 0.3);
                 Canvas.SetTop(foodAccent, fp.Y + size * 0.3);
+            }
+            }
+            catch (Exception ex)
+            {
+                // Log l'erreur mais ne pas faire crasher l'application
+                System.Diagnostics.Debug.WriteLine($"Erreur dans DrawFrame: {ex.Message}");
             }
         }
     }

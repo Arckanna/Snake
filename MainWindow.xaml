@@ -20,6 +20,14 @@
         <ContentControl Content="{Binding}">
             <ContentControl.Style>
                 <Style TargetType="ContentControl">
+                    <!-- Template par défaut pour l'écran d'accueil -->
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <views:HomeView DataContext="{Binding WelcomeViewModel}"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
                     <Style.Triggers>
                         <!-- Écran d'accueil -->
                         <DataTrigger Binding="{Binding CurrentState}" Value="{x:Static viewModels:AppState.Home}">

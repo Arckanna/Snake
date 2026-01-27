@@ -75,19 +75,27 @@ namespace Snake.ViewModels
         /// <param name="tickIntervalMs">Intervalle du timer en millisecondes. Si non spécifié, utilise la valeur par défaut de GameConfig.</param>
         public void Start(int? tickIntervalMs = null)
         {
-            _tickIntervalMs = tickIntervalMs ?? GameConfig.TickIntervalMs;
-            
-            _engine.Initialize(
-                GameConfig.AreaWidth,
-                GameConfig.AreaHeight,
-                GameConfig.SquareSize,
-                GameConfig.InitialSnakeLength);
-            _pendingDirection = Direction.Right;
+            try
+            {
+                _tickIntervalMs = tickIntervalMs ?? GameConfig.TickIntervalMs;
+                
+                _engine.Initialize(
+                    GameConfig.AreaWidth,
+                    GameConfig.AreaHeight,
+                    GameConfig.SquareSize,
+                    GameConfig.InitialSnakeLength);
+                _pendingDirection = Direction.Right;
 
-            _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
+                _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
 
-            NotifyAll();
-            FrameUpdated?.Invoke(this, EventArgs.Empty);
+                NotifyAll();
+                FrameUpdated?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur dans GameViewModel.Start: {ex.Message}\n{ex.StackTrace}");
+                throw; // Re-lancer pour que l'appelant puisse gérer
+            }
         }
 
         [RelayCommand]

@@ -16,6 +16,7 @@ namespace Snake.ViewModels
         private AppState _currentState = AppState.Home;
         private GameViewModel? _gameViewModel;
         private WelcomeViewModel? _welcomeViewModel;
+        private Difficulty? _pendingDifficulty;
 
         public MainViewModel(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {
@@ -77,16 +78,43 @@ namespace Snake.ViewModels
         /// <summary>Change l'état vers l'écran de jeu.</summary>
         public void NavigateToGame(Difficulty difficulty)
         {
-            if (_gameViewModel == null)
+            try
             {
-                _gameViewModel = new GameViewModel(_engine, _timerService, _scoreService);
-                _gameViewModel.ReturnToWelcomeRequested += OnReturnToWelcomeRequested;
-                _gameViewModel.GameOverRequested += OnGameOverRequested;
-                _gameViewModel.GameRestarted += OnGameRestarted;
+                if (_gameViewModel == null)
+                {
+                    _gameViewModel = new GameViewModel(_engine, _timerService, _scoreService);
+                    _gameViewModel.ReturnToWelcomeRequested += OnReturnToWelcomeRequested;
+                    _gameViewModel.GameOverRequested += OnGameOverRequested;
+                    _gameViewModel.GameRestarted += OnGameRestarted;
+                }
+                // Stocker la difficulté pour démarrer le jeu une fois que GameView est prêt
+                _pendingDifficulty = difficulty;
+                CurrentState = AppState.Playing;
+                // Le jeu sera démarré par GameView quand il sera chargé
             }
-            CurrentState = AppState.Playing;
-            // Démarrer le jeu avec la difficulté sélectionnée
-            _gameViewModel.Start((int)difficulty);
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur dans NavigateToGame: {ex.Message}\n{ex.StackTrace}");
+                System.Windows.MessageBox.Show($"Erreur lors de la navigation vers le jeu: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>Démarre le jeu si une difficulté est en attente. Appelé par GameView quand il est prêt.</summary>
+        public void StartGameIfPending()
+        {
+            if (_pendingDifficulty.HasValue && _gameViewModel != null)
+            {
+                try
+                {
+                    _gameViewModel.Start((int)_pendingDifficulty.Value);
+                    _pendingDifficulty = null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erreur lors du démarrage du jeu: {ex.Message}\n{ex.StackTrace}");
+                    System.Windows.MessageBox.Show($"Erreur lors du démarrage du jeu: {ex.Message}", "Erreur", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                }
+            }
         }
 
         /// <summary>Change l'état vers l'écran Game Over.</summary>
