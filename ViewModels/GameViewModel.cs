@@ -78,7 +78,6 @@ namespace Snake.ViewModels
                 AreaWidth = width;
                 AreaHeight = height;
                 _dimensionsInitialized = true;
-                Debug.WriteLine($"GameViewModel.InitializeWithDimensions: Dimensions initialisées à {width}x{height}");
             }
         }
 
@@ -113,12 +112,8 @@ namespace Snake.ViewModels
             {
                 // Vérifier que les dimensions réelles ont été initialisées
                 if (!_dimensionsInitialized)
-                {
-                    Debug.WriteLine($"GameViewModel.Start: Les dimensions n'ont pas encore été initialisées, démarrage différé");
                     return;
-                }
 
-                Debug.WriteLine($"GameViewModel.Start: Démarrage avec tickIntervalMs={tickIntervalMs}, dimensions={_areaWidth}x{_areaHeight}");
                 _tickIntervalMs = tickIntervalMs ?? GameConfig.TickIntervalMs;
 
                 _engine.Initialize(
@@ -128,12 +123,9 @@ namespace Snake.ViewModels
                     GameConfig.InitialSnakeLength);
                 _pendingDirection = Direction.Right;
 
-                Debug.WriteLine($"GameViewModel.Start: Engine initialisé, SnakeParts.Count={_engine.SnakeParts?.Count ?? 0}, FoodPosition={_engine.FoodPosition}");
-
                 _timerService.Start(TimeSpan.FromMilliseconds(_tickIntervalMs), OnTickCallback);
 
                 NotifyAll();
-                Debug.WriteLine($"GameViewModel.Start: FrameUpdated déclenché, abonnés={FrameUpdated?.GetInvocationList().Length ?? 0}");
                 FrameUpdated?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)

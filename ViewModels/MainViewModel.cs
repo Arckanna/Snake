@@ -93,7 +93,7 @@ namespace Snake.ViewModels
         {
             try
             {
-                if (_gameViewModel == null)
+                if (GameViewModel == null)
                 {
                     GameViewModel = new GameViewModel(_engine, _timerService, _scoreService);
                     GameViewModel.ReturnToWelcomeRequested += OnReturnToWelcomeRequested;
@@ -121,10 +121,7 @@ namespace Snake.ViewModels
                 {
                     // Vérifier que les dimensions sont initialisées avant de démarrer
                     if (!GameViewModel.AreDimensionsInitialized)
-                    {
-                        Debug.WriteLine("MainViewModel.StartGameIfPending: Les dimensions ne sont pas encore initialisées, démarrage différé");
                         return;
-                    }
 
                     GameViewModel.Start((int)_pendingDifficulty.Value);
                     _pendingDifficulty = null;
