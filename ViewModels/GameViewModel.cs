@@ -18,6 +18,9 @@ namespace Snake.ViewModels
         private readonly IScoreService _scoreService;
         private Direction _pendingDirection = Direction.Right;
         private int _bestScore;
+        private double _areaWidth = GameConfig.AreaWidth;
+        private double _areaHeight = GameConfig.AreaHeight;
+        private bool _dimensionsInitialized = false;
 
         public GameViewModel(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {
@@ -53,6 +56,35 @@ namespace Snake.ViewModels
         /// <summary>Taille d'une case en pixels.</summary>
         public double SquareSize => _engine.SquareSize;
 
+        /// <summary>Largeur de la zone de jeu (pixels).</summary>
+        public double AreaWidth
+        {
+            get => _areaWidth;
+            set => SetProperty(ref _areaWidth, value);
+        }
+
+        /// <summary>Hauteur de la zone de jeu (pixels).</summary>
+        public double AreaHeight
+        {
+            get => _areaHeight;
+            set => SetProperty(ref _areaHeight, value);
+        }
+
+        /// <summary>Initialise le moteur avec les dimensions réelles du canvas.</summary>
+        public void InitializeWithDimensions(double width, double height)
+        {
+            if (width > 0 && height > 0)
+            {
+                AreaWidth = width;
+                AreaHeight = height;
+                _dimensionsInitialized = true;
+                Debug.WriteLine($"GameViewModel.InitializeWithDimensions: Dimensions initialisées à {width}x{height}");
+            }
+        }
+
+        /// <summary>Indique si les dimensions réelles du canvas ont été initialisées.</summary>
+        public bool AreDimensionsInitialized => _dimensionsInitialized;
+
         /// <summary>Indique si la partie est terminée (pour afficher l'overlay).</summary>
         public bool IsGameOver => _engine.State == GameState.GameOver;
 
@@ -79,12 +111,19 @@ namespace Snake.ViewModels
         {
             try
             {
-                Debug.WriteLine($"GameViewModel.Start: Démarrage avec tickIntervalMs={tickIntervalMs}");
+                // Vérifier que les dimensions réelles ont été initialisées
+                if (!_dimensionsInitialized)
+                {
+                    Debug.WriteLine($"GameViewModel.Start: Les dimensions n'ont pas encore été initialisées, démarrage différé");
+                    return;
+                }
+
+                Debug.WriteLine($"GameViewModel.Start: Démarrage avec tickIntervalMs={tickIntervalMs}, dimensions={_areaWidth}x{_areaHeight}");
                 _tickIntervalMs = tickIntervalMs ?? GameConfig.TickIntervalMs;
-                
+
                 _engine.Initialize(
-                    GameConfig.AreaWidth,
-                    GameConfig.AreaHeight,
+                    _areaWidth,
+                    _areaHeight,
                     GameConfig.SquareSize,
                     GameConfig.InitialSnakeLength);
                 _pendingDirection = Direction.Right;
@@ -108,8 +147,8 @@ namespace Snake.ViewModels
         private void Rejouer()
         {
             _engine.Initialize(
-                GameConfig.AreaWidth,
-                GameConfig.AreaHeight,
+                _areaWidth,
+                _areaHeight,
                 GameConfig.SquareSize,
                 GameConfig.InitialSnakeLength);
             _pendingDirection = Direction.Right;

@@ -42,8 +42,8 @@ namespace Snake.ViewModels
         /// <summary>Titre de la fenêtre selon l'état actuel.</summary>
         public string Title => CurrentState switch
         {
-            AppState.Playing => _gameViewModel?.Title ?? "Serpentium",
-            AppState.GameOver => _gameViewModel?.Title ?? "Serpentium - Game Over",
+            AppState.Playing => GameViewModel?.Title ?? "Serpentium",
+            AppState.GameOver => GameViewModel?.Title ?? "Serpentium - Game Over",
             _ => "Serpentium"
         };
 
@@ -62,17 +62,27 @@ namespace Snake.ViewModels
         }
 
         /// <summary>ViewModel pour le jeu.</summary>
-        public GameViewModel? GameViewModel => _gameViewModel;
+        public GameViewModel? GameViewModel
+        {
+            get => _gameViewModel;
+            private set
+            {
+                if (SetProperty(ref _gameViewModel, value))
+                {
+                    OnPropertyChanged(nameof(GameViewModel));
+                }
+            }
+        }
 
         /// <summary>Change l'état vers l'écran d'accueil.</summary>
         public void NavigateToHome()
         {
-            if (_gameViewModel != null)
+            if (GameViewModel != null)
             {
-                _gameViewModel.Stop();
-                _gameViewModel.ReturnToWelcomeRequested -= OnReturnToWelcomeRequested;
-                _gameViewModel.GameOverRequested -= OnGameOverRequested;
-                _gameViewModel.GameRestarted -= OnGameRestarted;
+                GameViewModel.Stop();
+                GameViewModel.ReturnToWelcomeRequested -= OnReturnToWelcomeRequested;
+                GameViewModel.GameOverRequested -= OnGameOverRequested;
+                GameViewModel.GameRestarted -= OnGameRestarted;
             }
             CurrentState = AppState.Home;
             WelcomeViewModel.RefreshBestScore();
@@ -85,10 +95,10 @@ namespace Snake.ViewModels
             {
                 if (_gameViewModel == null)
                 {
-                    _gameViewModel = new GameViewModel(_engine, _timerService, _scoreService);
-                    _gameViewModel.ReturnToWelcomeRequested += OnReturnToWelcomeRequested;
-                    _gameViewModel.GameOverRequested += OnGameOverRequested;
-                    _gameViewModel.GameRestarted += OnGameRestarted;
+                    GameViewModel = new GameViewModel(_engine, _timerService, _scoreService);
+                    GameViewModel.ReturnToWelcomeRequested += OnReturnToWelcomeRequested;
+                    GameViewModel.GameOverRequested += OnGameOverRequested;
+                    GameViewModel.GameRestarted += OnGameRestarted;
                 }
                 // Stocker la difficulté pour démarrer le jeu une fois que GameView est prêt
                 _pendingDifficulty = difficulty;
@@ -105,11 +115,18 @@ namespace Snake.ViewModels
         /// <summary>Démarre le jeu si une difficulté est en attente. Appelé par GameView quand il est prêt.</summary>
         public void StartGameIfPending()
         {
-            if (_pendingDifficulty.HasValue && _gameViewModel != null)
+            if (_pendingDifficulty.HasValue && GameViewModel != null)
             {
                 try
                 {
-                    _gameViewModel.Start((int)_pendingDifficulty.Value);
+                    // Vérifier que les dimensions sont initialisées avant de démarrer
+                    if (!GameViewModel.AreDimensionsInitialized)
+                    {
+                        Debug.WriteLine("MainViewModel.StartGameIfPending: Les dimensions ne sont pas encore initialisées, démarrage différé");
+                        return;
+                    }
+
+                    GameViewModel.Start((int)_pendingDifficulty.Value);
                     _pendingDifficulty = null;
                 }
                 catch (Exception ex)

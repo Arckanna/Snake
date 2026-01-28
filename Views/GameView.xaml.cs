@@ -26,12 +26,115 @@ namespace Snake.Views
         // Propriété helper pour accéder au Canvas GameArea (évite les conflits avec le champ généré)
         private Canvas? GetGameArea() => FindName("GameArea") as Canvas;
 
+        // Flag pour savoir si le fond a déjà été dessiné
+        private bool _backgroundDrawn = false;
+
         public GameView()
         {
             InitializeComponent();
             Loaded += GameView_Loaded;
             DataContextChanged += GameView_DataContextChanged;
             IsVisibleChanged += GameView_IsVisibleChanged;
+            LayoutUpdated += GameView_LayoutUpdated;
+        }
+
+        private bool _layoutInitialized = false;
+
+        private void GameView_LayoutUpdated(object? sender, EventArgs e)
+        {
+            if (_layoutInitialized)
+                return;
+
+            var gameArea = GetGameArea();
+            if (gameArea == null)
+            {
+                Debug.WriteLine("GameView.LayoutUpdated: gameArea est null");
+                return;
+            }
+
+            // Si _viewModel est null, essayer de le récupérer depuis DataContext
+            if (_viewModel == null)
+            {
+                Debug.WriteLine($"GameView.LayoutUpdated: _viewModel est null, DataContext={DataContext?.GetType().Name ?? "null"}");
+                SubscribeToViewModel();
+                if (_viewModel == null)
+                {
+                    Debug.WriteLine("GameView.LayoutUpdated: _viewModel toujours null après SubscribeToViewModel");
+                    return;
+                }
+            }
+
+            // Essayer ActualWidth/ActualHeight d'abord, puis RenderSize
+            double width = gameArea.ActualWidth > 0 ? gameArea.ActualWidth : gameArea.RenderSize.Width;
+            double height = gameArea.ActualHeight > 0 ? gameArea.ActualHeight : gameArea.RenderSize.Height;
+
+            Debug.WriteLine($"GameView.LayoutUpdated: ActualWidth={gameArea.ActualWidth}, ActualHeight={gameArea.ActualHeight}, RenderSize={gameArea.RenderSize.Width}x{gameArea.RenderSize.Height}, Width={width}, Height={height}");
+
+            if (width > 0 && height > 0)
+            {
+                Debug.WriteLine($"GameView.LayoutUpdated: Canvas a maintenant une taille = {width}x{height}");
+                if (!_viewModel.AreDimensionsInitialized)
+                {
+                    Debug.WriteLine($"GameView.LayoutUpdated: Initialisation des dimensions et démarrage du jeu");
+                    _layoutInitialized = true;
+                    _viewModel.InitializeWithDimensions(width, height);
+                    DrawGameArea();
+                    _startGameAttempted = false;
+                    TryStartGame();
+
+                    // Se désabonner après la première initialisation réussie pour éviter les appels répétés
+                    LayoutUpdated -= GameView_LayoutUpdated;
+                }
+            }
+        }
+
+        private void GameArea_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Debug.WriteLine($"GameView.GameArea_SizeChanged: Ancienne taille = {e.PreviousSize.Width}x{e.PreviousSize.Height}, Nouvelle taille = {e.NewSize.Width}x{e.NewSize.Height}");
+            var gameArea = sender as Canvas;
+            if (gameArea == null)
+            {
+                Debug.WriteLine("GameView.GameArea_SizeChanged: gameArea est null");
+                return;
+            }
+
+            // Si _viewModel est null, essayer de le récupérer depuis DataContext
+            if (_viewModel == null)
+            {
+                Debug.WriteLine($"GameView.GameArea_SizeChanged: _viewModel est null, DataContext={DataContext?.GetType().Name ?? "null"}");
+                SubscribeToViewModel();
+                if (_viewModel == null)
+                {
+                    Debug.WriteLine("GameView.GameArea_SizeChanged: _viewModel toujours null après SubscribeToViewModel");
+                    return;
+                }
+            }
+
+            if (e.NewSize.Width > 0 && e.NewSize.Height > 0)
+            {
+                Debug.WriteLine($"GameView.GameArea_SizeChanged: Nouvelle taille valide = {e.NewSize.Width}x{e.NewSize.Height}");
+                // Initialiser les dimensions si elles ne l'ont pas encore été
+                if (!_viewModel.AreDimensionsInitialized)
+                {
+                    Debug.WriteLine("GameView.GameArea_SizeChanged: Initialisation des dimensions et démarrage du jeu");
+                    _viewModel.InitializeWithDimensions(e.NewSize.Width, e.NewSize.Height);
+                    DrawGameArea();
+
+                    // Réinitialiser le flag pour permettre le démarrage
+                    _startGameAttempted = false;
+                    TryStartGame();
+                }
+                else
+                {
+                    Debug.WriteLine("GameView.GameArea_SizeChanged: Mise à jour des dimensions");
+                    // Mettre à jour les dimensions si elles ont changé
+                    _viewModel.InitializeWithDimensions(e.NewSize.Width, e.NewSize.Height);
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"GameView.GameArea_SizeChanged: Taille invalide (Width={e.NewSize.Width}, Height={e.NewSize.Height})");
+            }
         }
 
         private void GameView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -41,26 +144,73 @@ namespace Snake.Views
                 Debug.WriteLine("GameView.IsVisibleChanged: Le contrôle est maintenant visible");
                 // Réinitialiser le flag pour permettre un nouveau démarrage
                 _startGameAttempted = false;
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    TryStartGame();
-                    if (_viewModel != null)
-                    {
-                        DrawFrame();
-                    }
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                _layoutInitialized = false;
+
+                // Réabonner à LayoutUpdated si nécessaire
+                LayoutUpdated += GameView_LayoutUpdated;
             }
         }
 
         private void GameView_Loaded(object sender, RoutedEventArgs e)
         {
+            Debug.WriteLine("GameView.GameView_Loaded: Le contrôle est chargé");
             SubscribeToViewModel();
+
+            // S'abonner à SizeChanged du canvas pour détecter quand il a une taille réelle
+            var gameArea = GetGameArea();
+            if (gameArea != null)
+            {
+                Debug.WriteLine($"GameView.GameView_Loaded: Abonnement à SizeChanged du canvas");
+                gameArea.SizeChanged += GameArea_SizeChanged;
+
+                // Vérifier immédiatement la taille
+                Debug.WriteLine($"GameView.GameView_Loaded: Taille immédiate du canvas = {gameArea.ActualWidth}x{gameArea.ActualHeight}");
+            }
+            else
+            {
+                Debug.WriteLine("GameView.GameView_Loaded: gameArea est null !");
+            }
+
+            // Forcer une mise à jour du layout pour que le canvas ait une taille réelle
+            UpdateLayout();
+
             // Attendre que le layout soit complété avant de dessiner
             Dispatcher.BeginInvoke(new Action(() =>
             {
+                Debug.WriteLine("GameView.GameView_Loaded: Dispatcher.BeginInvoke exécuté");
+                InitializeCanvasDimensionsAndStart();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+            Focus();
+        }
+
+        private void InitializeCanvasDimensionsAndStart()
+        {
+            var gameArea = GetGameArea();
+            if (gameArea == null)
+            {
+                Debug.WriteLine("GameView.InitializeCanvasDimensionsAndStart: gameArea est null");
+                return;
+            }
+
+            if (_viewModel == null)
+            {
+                Debug.WriteLine("GameView.InitializeCanvasDimensionsAndStart: _viewModel est null");
+                return;
+            }
+
+            Debug.WriteLine($"GameView.InitializeCanvasDimensionsAndStart: ActualWidth={gameArea.ActualWidth}, ActualHeight={gameArea.ActualHeight}, Width={gameArea.Width}, Height={gameArea.Height}");
+
+            // Attendre que le canvas ait une taille réelle
+            if (gameArea.ActualWidth > 0 && gameArea.ActualHeight > 0)
+            {
+                Debug.WriteLine($"GameView.InitializeCanvasDimensions: Canvas taille réelle = {gameArea.ActualWidth}x{gameArea.ActualHeight}");
+                _viewModel.InitializeWithDimensions(gameArea.ActualWidth, gameArea.ActualHeight);
                 DrawGameArea();
 
-                // Démarrer le jeu si nécessaire (via MainViewModel)
+                // Réinitialiser le flag pour permettre le démarrage maintenant que les dimensions sont prêtes
+                _startGameAttempted = false;
+
+                // Démarrer le jeu si nécessaire (via MainViewModel) - maintenant que les dimensions sont initialisées
                 TryStartGame();
 
                 if (_viewModel != null)
@@ -68,8 +218,30 @@ namespace Snake.Views
                     // Forcer un premier dessin si le jeu est déjà démarré
                     DrawFrame();
                 }
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-            Focus();
+            }
+            else
+            {
+                // Réessayer après un court délai si les dimensions ne sont pas encore disponibles
+                Debug.WriteLine($"GameView.InitializeCanvasDimensions: Canvas pas encore dimensionné (ActualWidth={gameArea.ActualWidth}, ActualHeight={gameArea.ActualHeight}), réessai...");
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    InitializeCanvasDimensionsAndStart();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+        }
+
+        private void InitializeCanvasDimensions()
+        {
+            var gameArea = GetGameArea();
+            if (gameArea == null || _viewModel == null)
+                return;
+
+            // Attendre que le canvas ait une taille réelle
+            if (gameArea.ActualWidth > 0 && gameArea.ActualHeight > 0)
+            {
+                Debug.WriteLine($"GameView.InitializeCanvasDimensions: Canvas taille réelle = {gameArea.ActualWidth}x{gameArea.ActualHeight}");
+                _viewModel.InitializeWithDimensions(gameArea.ActualWidth, gameArea.ActualHeight);
+            }
         }
 
         private bool _startGameAttempted = false;
@@ -163,16 +335,21 @@ namespace Snake.Views
 
         private void GameView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            Debug.WriteLine($"GameView.DataContextChanged: Ancien={e.OldValue?.GetType().Name ?? "null"}, Nouveau={e.NewValue?.GetType().Name ?? "null"}");
             UnsubscribeFromViewModel();
             SubscribeToViewModel();
+
+            // Réinitialiser le flag du fond lors du changement de DataContext
+            _backgroundDrawn = false;
+            _layoutInitialized = false;
 
             // Si le contrôle est déjà chargé et qu'on a un nouveau DataContext, essayer de démarrer le jeu
             if (IsLoaded && _viewModel != null)
             {
+                Debug.WriteLine("GameView.DataContextChanged: Contrôle chargé, initialisation des dimensions");
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    TryStartGame();
-                    DrawFrame();
+                    InitializeCanvasDimensionsAndStart();
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
         }
@@ -180,6 +357,7 @@ namespace Snake.Views
         private void SubscribeToViewModel()
         {
             _viewModel = DataContext as GameViewModel;
+            Debug.WriteLine($"GameView.SubscribeToViewModel: DataContext={DataContext?.GetType().Name ?? "null"}, _viewModel={_viewModel != null}");
             if (_viewModel != null)
             {
                 _viewModel.FrameUpdated += OnFrameUpdated;
@@ -223,6 +401,18 @@ namespace Snake.Views
             if (gameArea == null || gameArea.ActualWidth <= 0 || gameArea.ActualHeight <= 0)
                 return;
 
+            // Ne dessiner le fond qu'une seule fois
+            if (_backgroundDrawn && gameArea.Children.Count > 0)
+            {
+                // Mettre à jour la taille du fond existant si nécessaire
+                if (gameArea.Children[0] is Rectangle existingRect)
+                {
+                    existingRect.Width = gameArea.ActualWidth;
+                    existingRect.Height = gameArea.ActualHeight;
+                }
+                return;
+            }
+
             // Fond avec dégradé subtil
             var rect = new Rectangle
             {
@@ -237,9 +427,10 @@ namespace Snake.Views
             gradientBrush.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#F5F2EB")!, 0));
             gradientBrush.GradientStops.Add(new GradientStop((Color)ColorConverter.ConvertFromString("#E8E5DD")!, 1));
             rect.Fill = gradientBrush;
-            gameArea.Children.Add(rect);
+            gameArea.Children.Insert(0, rect); // Insérer au début pour toujours être à l'index 0
             Canvas.SetLeft(rect, 0);
             Canvas.SetTop(rect, 0);
+            _backgroundDrawn = true;
         }
 
         private void DrawFrame()
@@ -266,10 +457,7 @@ namespace Snake.Views
                 }
 
                 // S'assurer que le fond est dessiné si nécessaire
-                if (gameArea.Children.Count == 0)
-                {
-                    DrawGameArea();
-                }
+                DrawGameArea();
 
                 // Garder le fond (index 0), supprimer le reste
                 while (gameArea.Children.Count > 1)
@@ -290,12 +478,14 @@ namespace Snake.Views
                 }
 
                 var count = parts.Count;
-                Debug.WriteLine($"GameView.DrawFrame: Dessin de {count} segments, FoodPosition={_viewModel.FoodPosition}, State={_viewModel.State}");
+                Debug.WriteLine($"GameView.DrawFrame: Dessin de {count} segments, FoodPosition={_viewModel.FoodPosition}, State={_viewModel.State}, Area={_viewModel.AreaWidth}x{_viewModel.AreaHeight}");
 
                 for (int i = 0; i < count; i++)
                 {
                     var part = parts[i];
                     bool isHead = (i == count - 1);
+
+                    Debug.WriteLine($"GameView.DrawFrame: Segment {i} à position ({part.X}, {part.Y}), isHead={isHead}");
 
                     // Créer un rectangle avec coins arrondis
                     var r = new Rectangle

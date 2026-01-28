@@ -89,14 +89,14 @@ Snake/
 ├── ViewModels/
 │   ├── GameViewModel.cs           # Score, Title, IsGameOver, Start, RejouerCommand, FrameUpdated
 │   └── WelcomeViewModel.cs        # DemarrerCommand, StartGameRequested
-├── MainWindow.xaml / .xaml.cs     # Zone de jeu 700×400, overlay Perdu + Rejouer, binding GameViewModel
+├── MainWindow.xaml / .xaml.cs     # Zone de jeu 700×600, overlay Perdu + Rejouer, binding GameViewModel
 ├── WelcomeWindow.xaml / .xaml.cs  # Écran d’accueil, binding WelcomeViewModel
 ├── Snake.csproj
 ├── README.md
 ├── TESTS.md                       # Guide des tests unitaires (à quoi, pourquoi, comment)
 ├── Snake.Core/                    # Bibliothèque .NET 8, sans WPF
 │   ├── Core/
-│   │   ├── GameConfig.cs          # Constantes : 700×400, 100 ms, 20 (carré), 10 (longueur init)
+│   │   ├── GameConfig.cs          # Constantes : 700×600, 100 ms, 20 (carré), 10 (longueur init)
 │   │   ├── IGameEngine.cs         # Interface du moteur de jeu
 │   │   └── GameEngine.cs          # Implémentation (déplacement, collisions, nourriture)
 │   └── Models/
