@@ -85,15 +85,17 @@ namespace Snake.Core
             double newHeadY = head.Y + dY;
 
             // Vérification des collisions avec les murs
-            // Note: Les positions sont en pixels, mais on doit vérifier qu'elles restent dans les limites
+            // Les positions sont en pixels (multiples de squareSize)
             // La dernière position valide est (areaWidth - squareSize) pour X et (areaHeight - squareSize) pour Y
-            // Donc on vérifie si newHeadX >= areaWidth (pas >) car si areaWidth=700 et squareSize=20, la dernière case est à 680
-            // Si le serpent est à 680 et va à droite, newHeadX = 700, ce qui est >= 700, donc collision ✓
-            if (newHeadX < 0 || newHeadX >= _areaWidth || newHeadY < 0 || newHeadY >= _areaHeight)
+            // Exemple: si areaWidth=700 et squareSize=20, la dernière case est à X=680 (34*20)
+            // Si le serpent est à X=680 et va à droite, newHeadX=700, ce qui dépasse la limite
+            double maxValidX = _areaWidth - _squareSize;
+            double maxValidY = _areaHeight - _squareSize;
+            if (newHeadX < 0 || newHeadX > maxValidX || newHeadY < 0 || newHeadY > maxValidY)
             {
                 Debug.WriteLine($"GameEngine.Move: COLLISION MUR détectée! newHeadX={newHeadX}, newHeadY={newHeadY}, areaWidth={_areaWidth}, areaHeight={_areaHeight}");
                 Debug.WriteLine($"GameEngine.Move: Tête actuelle: ({head.X}, {head.Y}), direction: {_direction}, dX={dX}, dY={dY}");
-                Debug.WriteLine($"GameEngine.Move: Dernière position valide X: {_areaWidth - _squareSize}, Y: {_areaHeight - _squareSize}");
+                Debug.WriteLine($"GameEngine.Move: Dernière position valide X: {maxValidX}, Y: {maxValidY}");
                 _state = GameState.GameOver;
                 return;
             }
