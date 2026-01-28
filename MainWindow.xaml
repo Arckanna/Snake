@@ -6,7 +6,7 @@
         xmlns:views="clr-namespace:Snake.Views"
         xmlns:viewModels="clr-namespace:Snake.ViewModels"
         mc:Ignorable="d"
-        Title="Serpentium"
+        Title="{Binding Title}"
         Width="700"
         Height="600"
         WindowStartupLocation="CenterScreen"
@@ -16,37 +16,64 @@
         KeyDown="Window_KeyDown"
         Focusable="True">
     <Grid>
+        <!-- Écran d'accueil -->
         <Grid x:Name="WelcomeGrid"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
             <Grid.Style>
                 <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Setter Property="Visibility"
+                            Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Home}">
-                            <Setter Property="Visibility" Value="Visible"/>
+                        <DataTrigger Binding="{Binding CurrentState}"
+                                Value="{x:Static viewModels:AppState.Home}">
+                            <Setter Property="Visibility"
+                                    Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
-            <views:WelcomeView DataContext="{Binding Welcome}" />
+            <views:WelcomeView DataContext="{Binding WelcomeViewModel}"/>
         </Grid>
+
+        <!-- Écran de jeu -->
         <Grid x:Name="GameGrid"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Stretch">
             <Grid.Style>
                 <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Setter Property="Visibility"
+                            Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding CurrentScreen}" Value="{x:Static viewModels:ScreenKind.Game}">
-                            <Setter Property="Visibility" Value="Visible"/>
+                        <DataTrigger Binding="{Binding CurrentState}"
+                                Value="{x:Static viewModels:AppState.Playing}">
+                            <Setter Property="Visibility"
+                                    Value="Visible"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding CurrentState}"
+                                Value="{x:Static viewModels:AppState.GameOver}">
+                            <Setter Property="Visibility"
+                                    Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
-            <views:GameView DataContext="{Binding Game}"/>
-            <views:GameOverView DataContext="{Binding Game}"
-                                Visibility="{Binding IsGameOver, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <views:GameView DataContext="{Binding GameViewModel}"/>
+            <views:GameOverView DataContext="{Binding GameViewModel}">
+                <views:GameOverView.Style>
+                    <Style TargetType="views:GameOverView">
+                        <Setter Property="Visibility"
+                                Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.CurrentState, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    Value="{x:Static viewModels:AppState.GameOver}">
+                                <Setter Property="Visibility"
+                                        Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </views:GameOverView.Style>
+            </views:GameOverView>
         </Grid>
     </Grid>
 </Window>

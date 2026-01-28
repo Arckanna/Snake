@@ -33,7 +33,7 @@ namespace Snake.Views
             DataContextChanged += GameView_DataContextChanged;
             IsVisibleChanged += GameView_IsVisibleChanged;
         }
-        
+
         private void GameView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (IsVisible && IsLoaded && (bool)e.NewValue)
@@ -59,10 +59,10 @@ namespace Snake.Views
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 DrawGameArea();
-                
-                // Démarrer le jeu si nécessaire (via ShellViewModel)
+
+                // Démarrer le jeu si nécessaire (via MainViewModel)
                 TryStartGame();
-                
+
                 if (_viewModel != null)
                 {
                     // Forcer un premier dessin si le jeu est déjà démarré
@@ -71,25 +71,25 @@ namespace Snake.Views
             }), System.Windows.Threading.DispatcherPriority.Loaded);
             Focus();
         }
-        
+
         private bool _startGameAttempted = false;
-        
+
         private void TryStartGame()
         {
             // Éviter les tentatives multiples
             if (_startGameAttempted)
                 return;
-                
-            var shellViewModel = FindShellViewModel();
-            if (shellViewModel != null)
+
+            var mainViewModel = FindMainViewModel();
+            if (mainViewModel != null)
             {
-                Debug.WriteLine("GameView: ShellViewModel trouvé, appel de StartGameIfPending");
+                Debug.WriteLine("GameView: MainViewModel trouvé, appel de StartGameIfPending");
                 _startGameAttempted = true;
-                shellViewModel.StartGameIfPending();
+                mainViewModel.StartGameIfPending();
             }
             else
             {
-                Debug.WriteLine("GameView: ShellViewModel non trouvé");
+                Debug.WriteLine("GameView: MainViewModel non trouvé");
                 // Réessayer une seule fois après un court délai
                 if (!_startGameAttempted)
                 {
@@ -97,12 +97,12 @@ namespace Snake.Views
                     {
                         if (!_startGameAttempted)
                         {
-                            var shell = FindShellViewModel();
-                            if (shell != null)
+                            var mainVm = FindMainViewModel();
+                            if (mainVm != null)
                             {
-                                Debug.WriteLine("GameView: ShellViewModel trouvé au deuxième essai");
+                                Debug.WriteLine("GameView: MainViewModel trouvé au deuxième essai");
                                 _startGameAttempted = true;
-                                shell.StartGameIfPending();
+                                mainVm.StartGameIfPending();
                             }
                         }
                     }), System.Windows.Threading.DispatcherPriority.Loaded, null);
@@ -110,54 +110,54 @@ namespace Snake.Views
             }
         }
 
-        private ViewModels.ShellViewModel? FindShellViewModel()
+        private ViewModels.MainViewModel? FindMainViewModel()
         {
             // Essayer d'abord depuis la fenêtre (plus fiable)
             var window = System.Windows.Window.GetWindow(this);
-            if (window?.DataContext is ViewModels.ShellViewModel windowShellViewModel)
+            if (window?.DataContext is ViewModels.MainViewModel windowMainViewModel)
             {
-                Debug.WriteLine("GameView: ShellViewModel trouvé via Window.DataContext");
-                return windowShellViewModel;
+                Debug.WriteLine("GameView: MainViewModel trouvé via Window.DataContext");
+                return windowMainViewModel;
             }
-            
+
             // Essayer via le MainWindow directement avec la propriété publique
             if (window is MainWindow mainWindow)
             {
-                var shellVm = mainWindow.ShellViewModel;
-                if (shellVm != null)
+                var mainVm = mainWindow.MainViewModel;
+                if (mainVm != null)
                 {
-                    Debug.WriteLine("GameView: ShellViewModel trouvé via MainWindow.ShellViewModel");
-                    return shellVm;
+                    Debug.WriteLine("GameView: MainViewModel trouvé via MainWindow.MainViewModel");
+                    return mainVm;
                 }
             }
-            
+
             // Essayer via Application.Current.MainWindow
             if (System.Windows.Application.Current?.MainWindow is MainWindow appMainWindow)
             {
-                var shellVm = appMainWindow.ShellViewModel;
-                if (shellVm != null)
+                var mainVm = appMainWindow.MainViewModel;
+                if (mainVm != null)
                 {
-                    Debug.WriteLine("GameView: ShellViewModel trouvé via Application.Current.MainWindow");
-                    return shellVm;
+                    Debug.WriteLine("GameView: MainViewModel trouvé via Application.Current.MainWindow");
+                    return mainVm;
                 }
             }
-            
-            // Remonter dans l'arbre visuel pour trouver le ShellViewModel
+
+            // Remonter dans l'arbre visuel pour trouver le MainViewModel
             var element = this.Parent as System.Windows.FrameworkElement;
             int depth = 0;
             while (element != null && depth < 10) // Limiter la profondeur pour éviter les boucles infinies
             {
-                if (element.DataContext is ViewModels.ShellViewModel shellViewModel)
+                if (element.DataContext is ViewModels.MainViewModel mainViewModel)
                 {
-                    Debug.WriteLine($"GameView: ShellViewModel trouvé via arbre visuel (profondeur {depth})");
-                    return shellViewModel;
+                    Debug.WriteLine($"GameView: MainViewModel trouvé via arbre visuel (profondeur {depth})");
+                    return mainViewModel;
                 }
-                
+
                 element = element.Parent as System.Windows.FrameworkElement;
                 depth++;
             }
-            
-            Debug.WriteLine($"GameView: ShellViewModel non trouvé (profondeur max atteinte: {depth})");
+
+            Debug.WriteLine($"GameView: MainViewModel non trouvé (profondeur max atteinte: {depth})");
             return null;
         }
 
@@ -165,7 +165,7 @@ namespace Snake.Views
         {
             UnsubscribeFromViewModel();
             SubscribeToViewModel();
-            
+
             // Si le contrôle est déjà chargé et qu'on a un nouveau DataContext, essayer de démarrer le jeu
             if (IsLoaded && _viewModel != null)
             {
@@ -256,7 +256,7 @@ namespace Snake.Views
                 // Vérifier que le Canvas a une taille valide (utiliser Width/Height si ActualWidth/Height sont 0)
                 double canvasWidth = gameArea.ActualWidth > 0 ? gameArea.ActualWidth : gameArea.Width;
                 double canvasHeight = gameArea.ActualHeight > 0 ? gameArea.ActualHeight : gameArea.Height;
-                
+
                 if (canvasWidth <= 0 || canvasHeight <= 0)
                 {
                     Debug.WriteLine($"GameView.DrawFrame: Canvas taille invalide (Actual: {gameArea.ActualWidth}x{gameArea.ActualHeight}, Size: {gameArea.Width}x{gameArea.Height})");
@@ -292,100 +292,100 @@ namespace Snake.Views
                 var count = parts.Count;
                 Debug.WriteLine($"GameView.DrawFrame: Dessin de {count} segments, FoodPosition={_viewModel.FoodPosition}, State={_viewModel.State}");
 
-            for (int i = 0; i < count; i++)
-            {
-                var part = parts[i];
-                bool isHead = (i == count - 1);
-                
-                // Créer un rectangle avec coins arrondis
-                var r = new Rectangle
+                for (int i = 0; i < count; i++)
                 {
-                    Width = size,
-                    Height = size,
-                    Fill = isHead ? SnakeHeadBrush : SnakeBodyBrush,
-                    RadiusX = size * 0.2, // Coins arrondis (20% de la taille)
-                    RadiusY = size * 0.2
-                };
-                
-                // Ajouter une ombre pour la profondeur
-                r.Effect = new DropShadowEffect
-                {
-                    Color = Colors.Black,
-                    Direction = 270,
-                    ShadowDepth = 2,
-                    BlurRadius = 3,
-                    Opacity = 0.3
-                };
-                
-                // Pour la tête, ajouter un accent
-                if (isHead)
-                {
-                    // Ajouter un petit cercle pour les yeux (optionnel)
-                    var eyeSize = size * 0.15;
-                    var eyeOffset = size * 0.25;
-                    var leftEye = new Ellipse
-                    {
-                        Width = eyeSize,
-                        Height = eyeSize,
-                        Fill = Brushes.White,
-                        Opacity = 0.8
-                    };
-                    var rightEye = new Ellipse
-                    {
-                        Width = eyeSize,
-                        Height = eyeSize,
-                        Fill = Brushes.White,
-                        Opacity = 0.8
-                    };
-                    gameArea.Children.Add(leftEye);
-                    gameArea.Children.Add(rightEye);
-                    Canvas.SetLeft(leftEye, part.X + eyeOffset);
-                    Canvas.SetTop(leftEye, part.Y + eyeOffset);
-                    Canvas.SetLeft(rightEye, part.X + size - eyeOffset - eyeSize);
-                    Canvas.SetTop(rightEye, part.Y + eyeOffset);
-                }
-                
-                gameArea.Children.Add(r);
-                Canvas.SetLeft(r, part.X);
-                Canvas.SetTop(r, part.Y);
-            }
+                    var part = parts[i];
+                    bool isHead = (i == count - 1);
 
-            if (_viewModel.FoodPosition is { } fp)
-            {
-                // Nourriture avec coins arrondis et effet visuel
-                var food = new Ellipse
+                    // Créer un rectangle avec coins arrondis
+                    var r = new Rectangle
+                    {
+                        Width = size,
+                        Height = size,
+                        Fill = isHead ? SnakeHeadBrush : SnakeBodyBrush,
+                        RadiusX = size * 0.2, // Coins arrondis (20% de la taille)
+                        RadiusY = size * 0.2
+                    };
+
+                    // Ajouter une ombre pour la profondeur
+                    r.Effect = new DropShadowEffect
+                    {
+                        Color = Colors.Black,
+                        Direction = 270,
+                        ShadowDepth = 2,
+                        BlurRadius = 3,
+                        Opacity = 0.3
+                    };
+
+                    // Pour la tête, ajouter un accent
+                    if (isHead)
+                    {
+                        // Ajouter un petit cercle pour les yeux (optionnel)
+                        var eyeSize = size * 0.15;
+                        var eyeOffset = size * 0.25;
+                        var leftEye = new Ellipse
+                        {
+                            Width = eyeSize,
+                            Height = eyeSize,
+                            Fill = Brushes.White,
+                            Opacity = 0.8
+                        };
+                        var rightEye = new Ellipse
+                        {
+                            Width = eyeSize,
+                            Height = eyeSize,
+                            Fill = Brushes.White,
+                            Opacity = 0.8
+                        };
+                        gameArea.Children.Add(leftEye);
+                        gameArea.Children.Add(rightEye);
+                        Canvas.SetLeft(leftEye, part.X + eyeOffset);
+                        Canvas.SetTop(leftEye, part.Y + eyeOffset);
+                        Canvas.SetLeft(rightEye, part.X + size - eyeOffset - eyeSize);
+                        Canvas.SetTop(rightEye, part.Y + eyeOffset);
+                    }
+
+                    gameArea.Children.Add(r);
+                    Canvas.SetLeft(r, part.X);
+                    Canvas.SetTop(r, part.Y);
+                }
+
+                if (_viewModel.FoodPosition is { } fp)
                 {
-                    Width = size * 0.85, // Légèrement plus petit pour un effet visuel
-                    Height = size * 0.85,
-                    Fill = FoodBrush
-                };
-                
-                // Ajouter une ombre plus prononcée pour la nourriture
-                food.Effect = new DropShadowEffect
-                {
-                    Color = Colors.DarkRed,
-                    Direction = 270,
-                    ShadowDepth = 3,
-                    BlurRadius = 5,
-                    Opacity = 0.5
-                };
-                
-                // Ajouter un accent intérieur (cercle plus petit)
-                var foodAccent = new Ellipse
-                {
-                    Width = size * 0.4,
-                    Height = size * 0.4,
-                    Fill = FoodAccentBrush,
-                    Opacity = 0.6
-                };
-                
-                gameArea.Children.Add(food);
-                gameArea.Children.Add(foodAccent);
-                Canvas.SetLeft(food, fp.X + size * 0.075);
-                Canvas.SetTop(food, fp.Y + size * 0.075);
-                Canvas.SetLeft(foodAccent, fp.X + size * 0.3);
-                Canvas.SetTop(foodAccent, fp.Y + size * 0.3);
-            }
+                    // Nourriture avec coins arrondis et effet visuel
+                    var food = new Ellipse
+                    {
+                        Width = size * 0.85, // Légèrement plus petit pour un effet visuel
+                        Height = size * 0.85,
+                        Fill = FoodBrush
+                    };
+
+                    // Ajouter une ombre plus prononcée pour la nourriture
+                    food.Effect = new DropShadowEffect
+                    {
+                        Color = Colors.DarkRed,
+                        Direction = 270,
+                        ShadowDepth = 3,
+                        BlurRadius = 5,
+                        Opacity = 0.5
+                    };
+
+                    // Ajouter un accent intérieur (cercle plus petit)
+                    var foodAccent = new Ellipse
+                    {
+                        Width = size * 0.4,
+                        Height = size * 0.4,
+                        Fill = FoodAccentBrush,
+                        Opacity = 0.6
+                    };
+
+                    gameArea.Children.Add(food);
+                    gameArea.Children.Add(foodAccent);
+                    Canvas.SetLeft(food, fp.X + size * 0.075);
+                    Canvas.SetTop(food, fp.Y + size * 0.075);
+                    Canvas.SetLeft(foodAccent, fp.X + size * 0.3);
+                    Canvas.SetTop(foodAccent, fp.Y + size * 0.3);
+                }
             }
             catch (Exception ex)
             {

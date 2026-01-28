@@ -9,24 +9,20 @@ using Snake.ViewModels;
 namespace Snake
 {
     /// <summary>
-    /// Fenêtre principale : gère la navigation entre les écrans via ShellViewModel.
+    /// Fenêtre principale : gère la navigation entre les écrans via MainViewModel.
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly ShellViewModel _viewModel;
-        
-        public ShellViewModel ShellViewModel => _viewModel;
+        private readonly MainViewModel _viewModel;
+
+        public MainViewModel MainViewModel => _viewModel;
 
         public MainWindow(IGameEngine engine, ITimerService timerService, IScoreService scoreService)
         {
             InitializeComponent();
-            
-            // Créer les ViewModels nécessaires
-            var welcomeViewModel = new WelcomeViewModel(scoreService);
-            var gameViewModel = new GameViewModel(engine, timerService, scoreService);
-            
-            // Créer le ShellViewModel qui pilote l'affichage
-            DataContext = _viewModel = new ShellViewModel(welcomeViewModel, gameViewModel);
+
+            // Créer le MainViewModel qui pilote l'affichage et la navigation
+            DataContext = _viewModel = new MainViewModel(engine, timerService, scoreService);
         }
 
         private void Window_ContentRendered(object sender, EventArgs e)
@@ -36,24 +32,28 @@ namespace Snake
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            _viewModel.Game.Stop();
+            _viewModel.GameViewModel?.Stop();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             // Gérer les touches uniquement si on est en jeu
-            if (_viewModel.CurrentScreen != ScreenKind.Game)
+            if (_viewModel.CurrentState != AppState.Playing && _viewModel.CurrentState != AppState.GameOver)
+                return;
+
+            var gameViewModel = _viewModel.GameViewModel;
+            if (gameViewModel == null)
                 return;
 
             if (e.Key == Key.P)
             {
-                _viewModel.Game.TogglePause();
+                gameViewModel.TogglePause();
                 return;
             }
 
             var d = KeyToDirection(e.Key);
             if (d.HasValue)
-                _viewModel.Game.SetDirection(d.Value);
+                gameViewModel.SetDirection(d.Value);
         }
 
         private static Direction? KeyToDirection(Key key)
